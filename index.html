@@ -400,6 +400,8 @@ table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);out
   .card > .ch .hint{margin-left:auto;width:100%;font-size:11.5px}
   .card > .cb{padding:12px}
   .g2,.g3{grid-template-columns:1fr}
+  .finalrow{flex-direction:column;gap:8px}
+  .final b{font-size:20px}
   .f{gap:6px}
   .f > label{font-size:12.5px}
   .f input,.f select,.f textarea{height:46px;font-size:16px;border-radius:10px}
@@ -984,7 +986,7 @@ const SELFCARE = ["完全自理","轻度依赖","中度依赖","重度依赖"];
 const NIGHTS = ["无","偶尔","经常","整夜"];
 const SERVICES = ["住家(24小时)","白班(8-12小时)","钟点(半天及以下)","临时/按需"];
 const GENDER_REQS = ["不限","女","男"];
-const COOKS = ["不需要","一顿饭","两顿饭"];
+const COOKS = ["不需要","一顿饭","两顿饭","三顿饭"];
 
 const DEFAULT_ROSTER = [
   {id:"w1", name:"王秀兰", gender:"女", age:48, levels:["完全自理","轻度依赖"],
@@ -1013,7 +1015,7 @@ const DEFAULT_RULES = {
   medical:{ "鼻饲/胃管护理":800,"导尿管护理":700,"压疮/褥疮护理":800,"吸痰护理":800,"伤口换药护理":500,"注射/胰岛素":600,"生命体征监测":300,"康复训练协助":500,"夜间起夜照护":400,"吸氧护理":400 },
   night:{ "无":0, "偶尔":350, "经常":800, "整夜":1400 },
   risk:{ "无":0, "低":80, "中":250, "高":500 },
-  cook:{ "不需要":0, "一顿饭":250, "两顿饭":500 },
+  cook:{ "不需要":0, "一顿饭":250, "两顿饭":500, "三顿饭":750 },
   agency:1, monthDays:30, baseServiceDays:26, extraDayFee:150
 };
 
@@ -1811,6 +1813,7 @@ function buildTasks(level, riskObj){
     const whats = (EVAL && EVAL.cookWhat) ? "，口味/菜式："+EVAL.cookWhat : "";
     const cookTask = COOK_REQ==="一顿饭" ? "负责做一顿饭（含食材采购、餐后清洁）"+whats
       : COOK_REQ==="两顿饭" ? "负责做两顿饭（含食材采购、餐后清洁）"+whats
+      : COOK_REQ==="三顿饭" ? "负责做三顿饭（含食材采购、餐后清洁）"+whats
       : "承担做饭服务"+whats;
     add(cookTask);
   }
