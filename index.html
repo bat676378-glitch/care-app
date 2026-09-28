@@ -1,0 +1,2384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#B4542E" />
+<title>居家照护评估 · 智能匹配与报价系统（离线版）</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="照护评估报价" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="icons/icon-192.png" />
+<style>
+/* =========================================================
+   居家照护评估 · 智能匹配与报价系统 v2
+   纯离线单文件 · 暖纸感 · 移动端底部导航 + 分步向导
+   ========================================================= */
+:root{
+  --bg:#F5F3EF; --panel:#FFFFFF; --card:#FFFFFF;
+  --ink:#24262B; --ink2:#565C66; --ink3:#8E949E;
+  --line:#E7E3DC; --line2:#D8D2C8;
+  --brand:#B4542E; --brand2:#8C3E20; --brand-soft:#F7E9E0;
+  --ok:#2E7D4F; --ok-soft:#E8F3EC;
+  --warn:#96690B; --warn-soft:#F9F0D8;
+  --bad:#B23B3B; --bad-soft:#F9E9E9;
+  --info:#2F6290; --info-soft:#E8F0F7;
+  --purple:#7A5AA6; --pink:#B03A6A;
+  --radius:12px; --radius-s:8px;
+  --shadow:0 1px 2px rgba(45,40,32,.04),0 10px 26px rgba(45,40,32,.06);
+  --nav-h:60px;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+html{overflow-y:scroll}
+body{overflow-x:hidden}
+body{padding-bottom:34px}
+button,input,select,textarea{font-family:inherit;font-size:13px;color:var(--ink)}
+button{cursor:pointer;background:none;border:none}
+a{color:var(--brand)}
+svg{display:inline-block;vertical-align:middle}
+.wrap{max-width:1240px;margin:0 auto;padding:0 18px}
+.grow{flex:1}
+.mini{font-size:11px;color:var(--ink3)}
+.amt{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* ---------- 顶栏 ---------- */
+.topbar{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.hbar{display:flex;align-items:center;gap:13px;height:60px}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:700;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.ttl h1{font-size:16px;font-weight:700;letter-spacing:.2px;line-height:1.3}
+.ttl .sub{font-size:11.5px;color:var(--ink3);margin-top:1px}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:11.5px;background:var(--ok-soft);color:var(--ok);border:1px solid #CDE6D8;white-space:nowrap}
+.pill svg{width:12px;height:12px}
+.hbtns{display:flex;gap:8px;align-items:center}
+.btn{height:34px;padding:0 13px;border-radius:var(--radius-s);border:1px solid var(--line2);background:var(--panel);color:var(--ink);font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+.btn svg{width:14px;height:14px}
+.btn:hover{background:#FAF8F5;border-color:var(--ink3)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand2);border-color:var(--brand2)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink2)}
+.btn.ghost:hover{background:#EFECE7;color:var(--ink)}
+.btn.sm{height:28px;padding:0 10px;font-size:12px}
+.btn.big{width:100%;height:46px;font-size:14px;justify-content:center;margin-top:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.menu-btn{display:none}
+.menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:150px;overflow:hidden;z-index:60}
+.menu.open{display:block}
+.menu button{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;font-size:13px;text-align:left;color:var(--ink)}
+.menu button:hover{background:var(--brand-soft);color:var(--brand2)}
+.menu button svg{width:14px;height:14px}
+.hbar{position:relative}
+/* 安装引导横幅 */
+.installbar{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+.installbar[hidden]{display:none}
+.ib-inner{max-width:1240px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.ib-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ib-ic svg{width:19px;height:19px}
+.ib-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ib-tx b{font-size:13px;font-weight:700}
+.ib-tx span{font-size:11.5px;opacity:.92;line-height:1.45}
+.installbar .btn{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35);color:#fff;height:32px;padding:0 12px;font-size:12px;flex:0 0 auto}
+    .installbar .btn:hover{background:rgba(255,255,255,.3)}
+/* 保存按钮（绿） */
+.save-rec{margin-top:10px;background:var(--ok);border-color:var(--ok);width:100%}
+.save-rec:hover{background:var(--ok);filter:brightness(.96)}
+/* 第 5 步：期望服务类型 强调区块 */
+.svc-block{background:var(--brand-soft);border:1px solid #EBD8C4;border-radius:10px;padding:12px;margin-bottom:12px}
+.svc-block .f{gap:7px}
+.svc-block label{font-weight:700}
+/* 配置同步卡片（管理员） */
+.sync-card{background:#fff;border:1px solid #E8D5C6;border-radius:10px;padding:12px;margin-bottom:12px}
+.sync-card h3{font-size:13px;margin:0 0 4px;display:flex;align-items:center;gap:6px}
+.sync-card p{font-size:12px;color:#666;margin:0 0 8px;line-height:1.55}
+.sync-card p b{color:#B4542E}
+.sync-meta{font-size:11px;color:#8a7366;margin-bottom:8px}
+.sync-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sync-btns .btn{font-size:12px;padding:7px 12px}
+/* 评估记录页 */
+.recbadge{background:var(--brand);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;font-weight:700;line-height:1}
+.recbadge[hidden]{display:none}
+.recs-head{display:flex;align-items:baseline;gap:10px;margin:4px 0 12px;flex-wrap:wrap}
+.recs-head h2{font-size:16px;font-weight:700;margin:0}
+.rec-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);padding:13px 15px;margin-bottom:12px}
+.rec-top{display:flex;align-items:baseline;gap:10px}
+.rec-tt{font-weight:700;font-size:14.5px}
+.rec-time{font-size:11px;color:var(--ink3);margin-left:auto;white-space:nowrap}
+.rec-meta{display:flex;gap:6px;margin:8px 0 10px}
+.rec-meta .pill{background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.rec-rows{border-top:1px dashed var(--line2);padding-top:8px}
+.rec-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px}
+.rec-row i{font-style:normal;background:#F3EFE8;color:var(--ink2);font-size:10.5px;padding:1px 7px;border-radius:6px;width:38px;text-align:center;flex:0 0 auto}
+.rec-row b{min-width:72px}
+.rec-row .mini{color:var(--ink3);font-size:11px;margin-left:auto;text-align:right}
+.rec-btns{display:flex;gap:8px;margin-top:9px}
+.rec-btns .danger{color:var(--bad)!important;border-color:var(--bad)!important;background:#fff!important}
+.rec-empty{text-align:center;padding:44px 18px;color:var(--ink3)}
+.rec-empty-ic{width:52px;height:52px;border-radius:16px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.rec-empty-ic svg{width:26px;height:26px}
+.rec-empty p{margin:4px 0}
+.rec-empty .hint{font-size:11.5px;max-width:300px;margin:8px auto 0;line-height:1.6}
+.rec-detail .rec-dhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rec-dtt{font-weight:700;font-size:14px}
+.rec-sec{border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;margin-bottom:12px;background:var(--card)}
+.rec-sec h3{font-size:13px;font-weight:700;color:var(--ink2);margin:0 0 10px}
+.rec-w{border:1px solid var(--line);border-radius:var(--radius-s);padding:11px 12px;margin-bottom:9px;background:#FDFCFB}
+.rec-w:last-child{margin-bottom:0}
+.rec-wtop{display:flex;align-items:center;gap:10px}
+.rec-wscore{color:var(--brand);font-size:15px;margin-left:auto}
+.rec-wmeta{font-size:11.5px;color:var(--ink2)}
+.rec-wmeta2{font-size:11.5px;color:var(--ink3);margin-top:4px}
+/* 保存后询问 modal */
+.ask-panel{max-width:340px;text-align:center;padding:26px 22px 20px}
+.ask-ic{width:54px;height:54px;border-radius:50%;background:#E6F2E4;color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.ask-ic svg{width:27px;height:27px}
+.ask-tt{font-size:16px;font-weight:700;margin-bottom:6px}
+.ask-tx{font-size:12.5px;color:var(--ink2);margin-bottom:16px;line-height:1.6}
+.ask-acts{display:flex;gap:10px;justify-content:center}
+.ask-acts .btn{min-width:118px}
+
+/* ---------- 顶部页签（桌面） ---------- */
+.tabsrow{padding-top:14px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+.tab{padding:10px 16px;color:var(--ink2);font-weight:500;font-size:13.5px;display:inline-flex;align-items:center;gap:7px;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s}
+.tab svg{width:15px;height:15px;opacity:.8}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+.tab .locksym{font-size:11px;opacity:.75}
+.tabpane{display:none;padding:18px 0 8px;position:relative}
+.tabpane.active{display:block}
+
+/* ---------- 布局 ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(360px,.85fr);gap:18px;align-items:start}
+.sticky{position:sticky;top:76px}
+.formcol{min-width:0}
+
+/* ---------- 卡片 ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.card > .ch{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line);background:#FCFBF8}
+.card > .ch h2{font-size:13.5px;font-weight:600}
+.card > .ch .n{width:21px;height:21px;border-radius:7px;background:var(--brand-soft);color:var(--brand);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.card > .ch .hint{margin-left:auto;font-size:11px;color:var(--ink3)}
+.card > .cb{padding:14px 16px}
+.hint{font-size:11.5px;color:var(--ink3)}
+
+/* ---------- 表单 ---------- */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f > label{font-size:12px;font-weight:500;color:var(--ink2)}
+.f input,.f select,.f textarea{height:38px;border:1px solid var(--line2);border-radius:var(--radius-s);background:#FDFCFB;padding:0 11px;outline:none;transition:.15s;width:100%;color:var(--ink)}
+.f textarea{height:auto;padding:9px 11px;resize:vertical;min-height:64px}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+
+/* ---------- 选项 chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border:1px solid var(--line2);border-radius:999px;background:#FDFCFB;color:var(--ink2);font-size:12px;transition:.12s;display:inline-flex;align-items:center}
+.chip:hover{border-color:var(--ink3);color:var(--ink)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip.on.ok{background:var(--ok);border-color:var(--ok)}
+.chip.on.bad{background:var(--bad);border-color:var(--bad)}
+
+/* ADL */
+.adl{border:1px solid var(--line);border-radius:var(--radius-s);overflow:hidden}
+.adl .row{display:grid;grid-template-columns:1.35fr 2.4fr;gap:10px;align-items:center;padding:9px 11px;border-bottom:1px solid var(--line)}
+.adl .row:last-child{border-bottom:none}
+.adl .row:nth-child(odd){background:#FCFBF8}
+.adl .nm{font-size:12.5px;font-weight:500}
+.adl .chips{gap:5px}
+.adl .chip{padding:4px 11px;font-size:11.5px}
+
+/* 需求勾选 */
+.needs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.needchk{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:var(--radius-s);background:#FDFCFB;cursor:pointer;font-size:12.5px;transition:.12s}
+.needchk:hover{border-color:var(--line2)}
+.needchk input{accent-color:var(--brand);width:15px;height:15px}
+.needchk.on{border-color:var(--brand);background:var(--brand-soft)}
+
+/* ---------- 结果区 ---------- */
+.result{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.empty{padding:36px 22px;text-align:center;color:var(--ink3)}
+.empty .ic{width:52px;height:52px;margin:0 auto 12px;border-radius:14px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.empty .ic svg{width:26px;height:26px}
+.empty p{font-size:12.5px;margin-top:6px;line-height:1.7}
+.empty .steps3{margin:16px 0 4px;display:flex;flex-direction:column;gap:8px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto}
+.empty .steps3 div{display:flex;gap:9px;align-items:center;font-size:12px;color:var(--ink2)}
+.empty .steps3 i{width:20px;height:20px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-style:normal;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+
+.res-head{padding:16px;background:linear-gradient(160deg,#FCF7F3,#F6F0EA);border-bottom:1px solid var(--line)}
+.res-head .rt{font-size:12px;color:var(--ink2);font-weight:600;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+.res-head .rd{font-size:10.5px;color:var(--ink3);font-weight:400;letter-spacing:0}
+.res-head .lv{display:flex;align-items:baseline;gap:10px;margin-top:7px;flex-wrap:wrap}
+.res-head .lv b{font-size:22px;font-weight:700;color:var(--brand)}
+.res-head .lv .svc{font-size:12px;color:var(--ink2)}
+.adlbar{display:flex;flex-direction:column;gap:5px;margin-top:10px;font-size:11.5px;color:var(--ink2)}
+.mini-track{height:6px;border-radius:999px;background:#E8E3DB;overflow:hidden}
+.mini-track i{display:block;height:100%;border-radius:999px;background:var(--brand)}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font-size:11px;font-weight:600}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.badge.info{background:var(--info-soft);color:var(--info)}
+.badge.neutral{background:#EFECE7;color:var(--ink2)}
+
+.sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:none}
+.sec h3{font-size:12.5px;font-weight:700;color:var(--ink2);letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.sec h3 .bar{width:3px;height:13px;border-radius:2px;background:var(--brand)}
+
+.person{border:1px solid var(--line);border-radius:var(--radius-s);padding:12px;margin-bottom:9px;background:#FDFCFB;transition:.15s}
+.person.best{border-color:var(--brand);background:var(--brand-soft)}
+.person .ph{display:flex;align-items:center;gap:11px}
+.person .av{width:40px;height:40px;border-radius:50%;background:#EAE5DE;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink2);flex:0 0 auto;font-weight:600}
+.person.best .av{background:var(--brand);color:#fff}
+.person .pinfo{min-width:0;flex:1}
+.person .pn{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.person .pm{font-size:11px;color:var(--ink2);margin-top:2px;line-height:1.5}
+.ring{position:relative;flex:0 0 auto}
+.ring svg{display:block}
+.ring .rv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ring .rv b{font-size:14px;font-weight:700}
+.ring .rv span{font-size:8px;color:var(--ink3);margin-top:1px}
+.pbar{height:5px;border-radius:999px;background:#EDE9E2;margin-top:10px;overflow:hidden;display:flex}
+.pbar i{height:100%;display:block;min-width:2px}
+.pbar.big{height:12px;margin-top:0}
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
+.legend span{font-size:10.5px;color:var(--ink2);display:inline-flex;align-items:center;gap:4px}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.miss{font-size:11px;color:var(--bad);margin-top:7px}
+.hit{font-size:11px;color:var(--ok);margin-top:7px}
+
+table.price{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+table.price td{padding:7px 0;border-bottom:1px dashed var(--line);vertical-align:top}
+table.price td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+table.price tr.rule td{color:var(--ink2)}
+table.price tr.sum td{border-bottom:none;padding-top:12px;font-size:15px;font-weight:700}
+table.price tr.sum td:last-child{color:var(--brand);font-size:18px}
+.finalrow{display:flex;gap:10px;margin-top:12px}
+.final{flex:1;border-radius:var(--radius-s);padding:11px 13px;text-align:center;line-height:1.4}
+.final span{display:block;font-size:11px;color:var(--ink2)}
+.final b{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.final.short{background:var(--brand-soft);border:1px solid #EDD3C5;color:var(--brand2)}
+.final.long{background:var(--ok-soft);border:1px solid #CDE6D8;color:var(--ok)}
+.formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;color:var(--ink3);background:#FCFBF8;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:12px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+
+ul.tasks{list-style:none}
+ul.tasks li{font-size:12.5px;border-bottom:1px dashed var(--line)}
+ul.tasks li:last-child{border-bottom:none}
+ul.tasks label{display:flex;gap:9px;padding:7px 0;align-items:flex-start;cursor:pointer}
+ul.tasks input{accent-color:var(--brand);width:15px;height:15px;margin-top:3px;flex:0 0 auto}
+ul.tasks li.done span{color:var(--ink3);text-decoration:line-through}
+
+/* ---------- 可编辑表格 ---------- */
+table.grid2t{width:100%;border-collapse:collapse;font-size:12px}
+table.grid2t th{background:#FCFBF8;color:var(--ink2);font-weight:600;text-align:left;padding:8px;border-bottom:1px solid var(--line2);white-space:nowrap;font-size:11.5px}
+table.grid2t td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.grid2t input,table.grid2t select{height:30px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:0 7px;width:100%;font-size:12px;min-width:60px}
+table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);outline:none}
+.tblscroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-s);-webkit-overflow-scrolling:touch}
+.del{width:28px;height:28px;border:1px solid var(--line2);border-radius:7px;background:#fff;color:var(--bad);display:flex;align-items:center;justify-content:center}
+.del:hover{background:var(--bad-soft);border-color:var(--bad)}
+.addrow{margin-top:10px}
+
+.note{font-size:11.5px;color:var(--warn);background:var(--warn-soft);border:1px solid #EFDFB0;border-radius:var(--radius-s);padding:10px 12px;margin-bottom:12px;line-height:1.65}
+.note.ok{color:var(--ok);background:var(--ok-soft);border-color:#CDE6D8}
+.note.info{color:var(--info);background:var(--info-soft);border-color:#CFE0EE}
+.note svg{width:13px;height:13px;vertical-align:-2px;margin-right:2px}
+.rowflex{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.footer{text-align:center;color:var(--ink3);font-size:11px;padding:24px 0 6px}
+
+/* ---------- 管理员锁 ---------- */
+.lockoverlay{position:absolute;inset:0;background:rgba(250,247,242,.94);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding-top:56px;z-index:5}
+.lockcard{max-width:360px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 20px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.lockicon{width:40px;height:40px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.lockicon svg{width:20px;height:20px}
+.locktitle{font-weight:700;font-size:16px;color:var(--ink);margin-bottom:6px}
+.lockhint{font-size:12.5px;color:var(--ink2);margin-bottom:14px;line-height:1.6}
+.lockrow{display:flex;gap:8px}
+.lockrow input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:14px;outline:none}
+.lockrow input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.lockrow button{padding:10px 18px;border:none;border-radius:9px;background:var(--brand);color:#fff;font-weight:600;cursor:pointer}
+.lockerr{color:var(--bad);font-size:12px;margin-top:8px;min-height:16px}
+#pane-rules input:disabled,#pane-rules select:disabled,#pane-rules textarea:disabled{background:#F4F5F7;color:#7A818C;cursor:not-allowed;-webkit-text-fill-color:#7A818C;opacity:1}
+.frozenbanner{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:#FFF6E6;border:1px solid #F0D9A8;color:#8A5A12;font-size:13px;line-height:1.6}
+.frozenbanner b{color:#8A5A12}
+
+/* ---------- 分步向导（手机） ---------- */
+.stepsbar{display:none}
+.wiznav{display:none}
+
+/* ---------- 底部导航（手机） ---------- */
+.bnav{position:fixed;left:0;right:0;bottom:0;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:#fff;border-top:1px solid var(--line);display:none;z-index:70;box-shadow:0 -4px 18px rgba(45,40,32,.06)}
+.bnav .bi{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;color:var(--ink3);border:none;background:none;padding:6px 0 4px}
+.bnav .bi svg{width:21px;height:21px}
+.bnav .bi.on{color:var(--brand);font-weight:600}
+.fab{position:fixed;right:14px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);z-index:65;display:none;height:46px;padding:0 16px;border-radius:999px;background:var(--brand);color:#fff;font-size:13px;font-weight:600;align-items:center;gap:7px;box-shadow:0 8px 22px rgba(140,62,32,.35)}
+.fab svg{width:15px;height:15px}
+.fab.show{display:inline-flex}
+
+/* ---------- 报价单 / 工作安排单 ----------
+.sheet-modal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center}
+.sheet-modal[hidden]{display:none}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(36,38,43,.45);backdrop-filter:blur(2px)}
+.sheet-panel{position:relative;width:min(880px,94vw);max-height:90vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.25);overflow:hidden}
+.sheet-tools{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:#FCFBF8}
+.sheet-tt{font-size:14px;font-weight:700;flex:1}
+.sheet-acts{display:flex;gap:8px;flex-wrap:wrap}
+.sheet-scroll{overflow:auto;-webkit-overflow-scrolling:touch;padding:22px 18px;background:#EDEAE4}
+.sheet{background:#fff;width:800px;max-width:100%;margin:0 auto;padding:30px 34px;color:#24262B;font-size:13px;line-height:1.7}
+.sheet .s-org{text-align:center;border-bottom:2px solid #B4542E;padding-bottom:12px;margin-bottom:14px}
+.sheet .s-org .nm{font-size:19px;font-weight:700;color:#B4542E;letter-spacing:1px}
+.sheet .s-org .tt{font-size:15px;font-weight:700;margin-top:2px}
+.sheet .s-org .meta{font-size:11px;color:#8E949E;margin-top:3px}
+.sheet .s-row{display:flex;justify-content:space-between;gap:12px;padding:3px 0;flex-wrap:wrap}
+.sheet .s-sec{margin-top:14px;font-size:12px;font-weight:700;color:#B4542E;border-left:3px solid #B4542E;padding-left:8px}
+.sheet table{width:100%;border-collapse:collapse;margin-top:6px;font-size:12.5px}
+.sheet table td{padding:5px 6px;border-bottom:1px dashed #E7E3DC}
+.sheet table td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.sheet table tr.s2 td{font-weight:700;border-bottom:1px solid #D8D2C8}
+.sheet table tr.st td{font-weight:800;font-size:14px;color:#B4542E;border-bottom:none;padding-top:9px}
+.sheet .s-tasks{margin:4px 0 0;padding-left:0;list-style:none}
+.sheet .s-tasks li{display:flex;gap:7px;padding:3.5px 0;border-bottom:1px dashed #EFECE7}
+.sheet .s-tasks li::before{content:"";width:5px;height:5px;border-radius:50%;background:#B4542E;margin-top:7px;flex:0 0 auto}
+.sheet .s-note{margin-top:12px;font-size:11px;color:#8E949E;border-top:1px dashed #E7E3DC;padding-top:9px}
+.sheet .s-sign{display:flex;justify-content:space-between;margin-top:26px;gap:20px}
+.sheet .s-sign div{flex:1;text-align:center}
+.sheet .s-sign .ln{border-top:1px solid #24262B;padding-top:4px;font-size:11px;color:#565C66}
+.sheet .s-sign .dn{font-size:11px;color:#565C66;margin-bottom:34px}
+
+/* ---------- Toast ---------- */
+#toastWrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:#24262B;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:0 10px 28px rgba(0,0,0,.22);animation:tin .22s ease;max-width:88vw}
+.toast.ok{background:var(--ok)}
+.toast.bad{background:var(--bad)}
+@keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---------- 打印：结果报告 / 报价单 / 工作安排单 ---------- */
+@media print{
+  @page{margin:11mm}
+  body{background:#fff}
+  body *{visibility:hidden}
+  /* 打印报价单 / 工作安排单（打开模态后点「打印 / 存 PDF」） */
+  body.printing-sheet .sheet-scroll, body.printing-sheet .sheet-scroll *{visibility:visible}
+  body.printing-sheet .sheet-scroll{position:absolute;left:0;top:0;width:100%;height:auto;max-height:none;overflow:visible;padding:0;background:#fff}
+  body.printing-sheet .sheet-panel{max-height:none;box-shadow:none;border-radius:0}
+  body.printing-sheet .sheet{width:100%;padding:0;margin:0}
+  body.printing-sheet .sheet .s-sec{break-after:avoid}
+  body.printing-sheet .sheet .s-tasks li{break-inside:avoid}
+  /* 打印结果报告（点击主按钮区的「打印 / 导出 PDF」） */
+  #resultBox,#resultBox *{visibility:visible}
+  #resultBox{position:absolute;left:0;top:0;width:100%;max-width:100%;border:none;box-shadow:none}
+  .sec{break-inside:avoid}
+}
+
+/* ---------- 焦点可见 / 动效克制 ---------- */
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,.needchk:focus-visible,.bi:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ============ 手机 / 小屏适配 ============ */
+@media (max-width:900px){
+  .wrap{max-width:100%;padding:0 12px}
+  body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px)}
+  .topbar .hbtns{display:none}
+  .menu-btn{display:inline-flex}
+  .hbar{height:auto;min-height:56px;flex-wrap:wrap;gap:8px;padding:8px 0}
+  .hbar h1{font-size:14.5px}
+  .hbar .sub{display:none}
+  .hbar .logo{width:30px;height:30px;border-radius:9px;font-size:15px}
+  .pill{display:none}
+  .tabsrow{display:none}
+  .tabs{display:none}
+  .tabpane{padding:12px 0 4px}
+  .cols{grid-template-columns:1fr;gap:14px}
+  .card{border-radius:11px;margin-bottom:12px;box-shadow:0 1px 2px rgba(45,40,32,.05)}
+  .card > .ch{padding:11px 12px;flex-wrap:wrap}
+  .card > .ch .hint{margin-left:auto;width:100%;font-size:11.5px}
+  .card > .cb{padding:12px}
+  .g2,.g3{grid-template-columns:1fr}
+  .f{gap:6px}
+  .f > label{font-size:12.5px}
+  .f input,.f select,.f textarea{height:46px;font-size:16px;border-radius:10px}
+  .f textarea{min-height:80px}
+  .chips{gap:8px}
+  .chip{padding:9px 14px;font-size:13px;min-height:38px;display:inline-flex;align-items:center;border-radius:10px}
+  .adl .row{grid-template-columns:1fr;gap:8px;padding:11px 12px}
+  .adl .nm{font-size:13px}
+  .adl .chip{padding:8px 12px;font-size:12.5px;min-height:36px}
+  .needs{grid-template-columns:1fr}
+  .needchk{padding:12px;font-size:14px}
+  .needchk input{width:19px;height:19px}
+  ul.tasks input{width:20px;height:20px;margin-top:2px}
+  ul.tasks label{padding:10px 0}
+  .sticky{position:static;top:auto}
+  .res-head{padding:14px}
+  .res-head .lv b{font-size:20px}
+  .sec{padding:13px 12px}
+  .person{padding:12px}
+  .person .av{width:36px;height:36px;font-size:14px}
+  table.price{font-size:13px}
+  table.price tr.sum td{font-size:14px}
+  table.price tr.sum td:last-child{font-size:17px}
+  ul.tasks li{font-size:13px}
+  .tblscroll{-webkit-overflow-scrolling:touch}
+  table.grid2t{font-size:12px}
+  table.grid2t input,table.grid2t select{height:34px;font-size:13px}
+  .lockoverlay{padding-top:24px;align-items:flex-start}
+  .lockcard{margin:0 12px;padding:18px 16px;border-radius:14px}
+  .locktitle{font-size:15px}
+  .lockrow{flex-wrap:wrap}
+  .lockrow input{min-width:0;font-size:16px;height:46px}
+  .lockrow button{width:100%;height:46px;font-size:14px}
+  .bnav{display:flex}
+  .fab.show{display:inline-flex}
+  .footer{padding:18px 0 4px}
+  /* 触控目标与可读性 */
+  .menu-btn{min-width:44px;min-height:44px;padding:0 10px}
+  .float-result{display:inline-flex;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);z-index:70;height:46px;padding:0 20px;font-size:14px;border-radius:23px;box-shadow:0 8px 24px rgba(45,40,32,.3);justify-content:center}
+  .float-result[hidden]{display:none}
+  .empty .btn{min-height:44px;justify-content:center}
+  .btn.sm{min-height:44px;padding:0 14px}
+  .note{font-size:13px}
+  .adl .nm{font-size:14px}
+  .stepsbar .d{font-size:12px}
+  .stepsbar .sd i{font-size:11px}
+  /* 结果未生成时，手机端隐藏操作条（由悬浮按钮承担生成入口），避免被底部导航遮挡 */
+  .resultcol .btn.big{display:none}
+  .resultcol .rowflex{display:none}
+  .resultcol.has-result .btn.big{display:inline-flex}
+  .resultcol.has-result .rowflex{display:flex}
+
+  /* 手机端：所有 grid 强制单列（含带内联样式的容器，避免多列挤压导致标签换行、点按困难） */
+  .grid.g2,.grid.g3{grid-template-columns:1fr!important}
+
+  /* 分步向导 */
+  .stepsbar{display:flex;gap:0;margin:2px 2px 12px;position:relative}
+  .stepsbar .sd{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;z-index:1}
+  .stepsbar .sd::before{content:"";position:absolute;top:12px;left:calc(50% + 13px);right:calc(-50% + 13px);height:2px;background:var(--line2);z-index:-1}
+  .stepsbar .sd:last-child::before{display:none}
+  .stepsbar .d{width:25px;height:25px;border-radius:50%;background:#EDE9E2;color:var(--ink3);font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--line2)}
+  .stepsbar .sd i{font-style:normal;font-size:10px;color:var(--ink3);white-space:nowrap}
+  .stepsbar .sd.on .d{background:var(--ok);border-color:var(--ok);color:#fff}
+  .stepsbar .sd.on::before{background:var(--ok)}
+  .stepsbar .sd.cur .d{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+  .stepsbar .sd.cur i{color:var(--brand);font-weight:600}
+  .stepsbar .sd.on.cur::before{background:var(--ok)}
+  .wiznav{display:flex;align-items:center;gap:10px;position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 10px);z-index:40;background:rgba(245,243,239,.92);backdrop-filter:blur(6px);padding:10px 2px;margin:4px 0 0;border-radius:12px}
+  .wiznav .btn{flex:1;height:44px;justify-content:center;font-size:14px}
+  .wiznav .wizpos{font-size:12px;color:var(--ink3);white-space:nowrap}
+  .step{display:none}
+  .step.active{display:block}
+  .finalrow{flex-direction:column;gap:8px}
+  .sheet-panel{width:96vw;max-height:88vh;border-radius:12px}
+  .sheet-scroll{padding:14px 10px}
+  .sheet{padding:20px 18px;font-size:12.5px}
+  .sheet .s-org .nm{font-size:17px}
+  .sheet-acts .btn{min-height:44px}
+}
+@media (max-width:400px){
+  .hbar h1{font-size:13.5px}
+  .card > .ch h2{font-size:12.5px}
+  .chip{padding:8px 12px;font-size:12.5px}
+  .res-head .lv b{font-size:18px}
+  .person .pn{font-size:13.5px}
+  .stepsbar .sd i{font-size:9px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap hbar">
+    <div class="logo">护</div>
+    <div class="ttl">
+      <h1>居家照护评估 · 智能匹配与报价系统</h1>
+      <div class="sub">评估信息录入 → 加权匹配照护人员 → 透明费用拆解 → 照护任务清单</div>
+    </div>
+    <div class="spacer"></div>
+    <span class="pill" title="所有数据与规则均保存在本机浏览器，不联网">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span>纯离线运行 · 数据本机保存</span>
+    </span>
+    <div class="hbtns" id="headBtns">
+      <button class="btn" id="btnExport" title="导出全部配置与案例为 JSON">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>导出配置</button>
+      <button class="btn" id="btnImport" title="导入 JSON 配置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>导入配置</button>
+      <button class="btn" id="btnFreeze" title="将当前费率与规则固化，生成他人不可修改的锁定版文件">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>锁定版</button>
+      <button class="btn ghost" id="btnReset" title="恢复默认数据">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>重置</button>
+    </div>
+    <button class="btn menu-btn" id="btnMenu" aria-label="更多操作">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+    </button>
+    <div class="menu" id="headMenu">
+      <button data-act="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>导出配置</button>
+      <button data-act="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>导入配置</button>
+      <button data-act="freeze"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>生成锁定版</button>
+      <button data-act="reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>恢复默认</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap tabsrow">
+  <nav class="tabs" id="topTabs">
+    <button class="tab active" data-tab="assess">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+      录入评估</button>
+    <button class="tab" data-tab="roster">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      护工名册<span class="locksym"></span></button>
+    <button class="tab" data-tab="rules">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.42 0l8.58-8.58a1 1 0 0 0 0-1.42Z"/><path d="M7 7h.01"/></svg>
+      费率与规则<span class="locksym"></span></button>
+    <button class="tab" data-tab="weights">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/></svg>
+      匹配权重<span class="locksym"></span></button>
+    <button class="tab" data-tab="records">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+      评估记录<span class="recbadge" id="recBadge" hidden></span></button>
+  </nav>
+</div>
+
+<!-- 安装引导横幅（手机端 / 微信内打开时显示） -->
+<div class="installbar" id="installBar" hidden>
+  <div class="ib-inner">
+    <div class="ib-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/><path d="M12 8v6"/><path d="m9 11 3 3 3-3"/></svg>
+    </div>
+    <div class="ib-tx">
+      <b id="ibTitle">安装到手机，像 App 一样使用</b>
+      <span id="ibMsg"></span>
+    </div>
+    <button class="btn" id="ibClose">知道了</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ============ ① 录入评估 ============ -->
+  <section class="tabpane active" id="pane-assess">
+    <div class="note info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <b>让结果更准的关键</b>：① 护工名册用你机构自己的真实人员与报价；② 费率已按<b>呼和浩特</b>公开市场行情预置，请替换为<b>智护星家政 / 美团门店的真实标准</b>；③ 评估表尽量填全。数据都在本机保存，不联网；填写过程中结果会实时更新。
+    </div>
+
+    <div class="stepsbar" id="stepsBar">
+      <div class="sd on cur" data-step="1"><span class="d">1</span><i>基本信息</i></div>
+      <div class="sd" data-step="2"><span class="d">2</span><i>健康医疗</i></div>
+      <div class="sd" data-step="3"><span class="d">3</span><i>生活能力</i></div>
+      <div class="sd" data-step="4"><span class="d">4</span><i>医疗·风险</i></div>
+      <div class="sd" data-step="5"><span class="d">5</span><i>服务要求</i></div>
+    </div>
+
+    <div class="cols">
+      <!-- 左：表单 -->
+      <div class="formcol">
+
+        <div class="card step" data-step="1">
+          <div class="ch"><span class="n">1</span><h2>被照护人基本信息</h2></div>
+          <div class="cb">
+            <div class="grid g3">
+              <div class="f"><label>姓名</label><input id="f_name" placeholder="如 张三" autocomplete="off" /></div>
+              <div class="f"><label>性别</label><select id="f_gender"><option value="">请选择</option><option>男</option><option>女</option></select></div>
+              <div class="f"><label>年龄</label><input id="f_age" type="number" inputmode="numeric" placeholder="如 78" /></div>
+              <div class="f"><label>体重 (kg)</label><input id="f_weight" type="number" inputmode="decimal" placeholder="如 62" /></div>
+              <div class="f"><label>与谁同住</label><input id="f_live" placeholder="如 独居 / 与配偶" autocomplete="off" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card step" data-step="2">
+          <div class="ch"><span class="n">2</span><h2>健康状况与医疗信息</h2></div>
+          <div class="cb">
+            <div class="grid g2">
+              <div class="f"><label>主要疾病 / 诊断</label><input id="f_diag" placeholder="如 脑梗后遗症、高血压" autocomplete="off" /></div>
+              <div class="f"><label>慢性病史</label><input id="f_chronic" placeholder="如 冠心病 10 年" autocomplete="off" /></div>
+              <div class="f"><label>近期住院 / 手术</label><input id="f_surgery" placeholder="如 髋关节置换术后 1 月" autocomplete="off" /></div>
+              <div class="f"><label>目前用药情况</label><input id="f_med" placeholder="如 降压药每日 1 次" autocomplete="off" /></div>
+            </div>
+            <div class="grid g2" style="margin-top:12px">
+              <div class="f"><label>打胰岛素（次/天）</label><input id="f_insulin" type="number" inputmode="numeric" min="0" placeholder="如 2，无则留空" /></div>
+              <div class="f"><label>胰岛素时间点</label><input id="f_insulin_time" placeholder="如 早、晚饭前" autocomplete="off" /></div>
+              <div class="f"><label>喂药 / 口服药（次/天）</label><input id="f_oral" type="number" inputmode="numeric" min="0" placeholder="如 3，无则留空" /></div>
+              <div class="f"><label>喂药时间点</label><input id="f_oral_time" placeholder="如 早中晚饭后" autocomplete="off" /></div>
+              <div class="f"><label>测血压 / 血糖（次/天）</label><input id="f_monitor" type="number" inputmode="numeric" min="0" placeholder="如 2，无则留空" /></div>
+              <div class="f"><label>其他需定时的护理</label><input id="f_othercare" placeholder="如 换药/雾化，每几小时一次" autocomplete="off" /></div>
+            </div>
+            <div class="grid g3" style="margin-top:12px">
+              <div class="f"><label>意识状态</label><select id="f_consc"><option value="">请选择</option><option>清醒</option><option>嗜睡</option><option>模糊</option><option>昏迷</option></select></div>
+              <div class="f"><label>认知状况</label><select id="f_cog"><option value="">请选择</option><option>正常</option><option>轻度障碍</option><option>中度障碍</option><option>重度障碍</option></select></div>
+              <div class="f"><label>视力 / 听力 / 吞咽</label><input id="f_sense" placeholder="如 听力下降、吞咽困难" autocomplete="off" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card step" data-step="3">
+          <div class="ch"><span class="n">3</span><h2>日常生活能力（ADL）</h2><span class="hint">逐项点击选择</span></div>
+          <div class="cb"><div class="adl" id="adlBox"></div></div>
+        </div>
+
+        <div class="card step" data-step="4">
+          <div class="ch"><span class="n">4</span><h2>医疗护理需求与安全风险</h2></div>
+          <div class="cb">
+            <div class="f" style="margin-bottom:12px"><label>需要的医疗 / 护理服务（可多选）</label><div class="needs" id="needsBox"></div></div>
+            <div class="grid g3">
+              <div class="f"><label>跌倒风险</label><div class="chips" data-risk="fall"></div></div>
+              <div class="f"><label>走失风险</label><div class="chips" data-risk="wander"></div></div>
+              <div class="f"><label>压疮风险</label><div class="chips" data-risk="pressure"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card step" data-step="5">
+          <div class="ch"><span class="n">5</span><h2>服务与照护要求</h2></div>
+          <div class="cb">
+            <div class="svc-block">
+              <div class="f"><label>期望服务类型（必选，选择后结果实时更新）</label><div class="chips" id="svcBox"></div></div>
+            </div>
+            <div class="grid g3">
+              <div class="f"><label>每月服务天数（基准 26 天 / 休 4 天；每多 1 天 +150）</label><input id="f_days" type="number" inputmode="numeric" placeholder="如 26" /></div>
+              <div class="f"><label>每日时长（小时）</label><input id="f_hours" type="number" inputmode="numeric" placeholder="如 24" /></div>
+              <div class="f"><label>期望开始日期</label><input id="f_start" type="date" /></div>
+            </div>
+            <div class="grid g2" style="margin-top:12px">
+              <div class="f"><label>自理程度（最终判定，可覆盖自动结果）</label><div class="chips" id="selfcareBox"></div></div>
+              <div class="f"><label>夜间护理需求</label><div class="chips" id="nightBox"></div></div>
+              <div class="f"><label>对护工的性别要求</label><div class="chips" id="genderReqBox"></div></div>
+              <div class="f"><label>对护工的年龄要求（填写，如 45岁以下 / 40-55岁）</label><input id="f_ageReq" placeholder="如 40-55岁" autocomplete="off" /></div>
+              <div class="f"><label>客户对做饭的要求</label><div class="chips" id="cookReqBox"></div></div>
+              <div class="f"><label>需要做什么饭（口味／菜式，填写）</label><input id="f_cookWhat" placeholder="如 清淡软食 / 少油少盐 / 北方家常菜" autocomplete="off" /></div>
+            </div>
+            <div class="f" style="margin-top:12px"><label>因病情／身体情况不能做的事 / 照护禁忌（填写）</label><input id="f_cannot" placeholder="如 不能久坐、不能弯腰搬重物、忌口/不能吃的食物、不做剧烈活动……" autocomplete="off" /></div>
+          </div>
+        </div>
+
+        <!-- 手机端分步导航 -->
+        <div class="wiznav" id="wizNav">
+          <button class="btn" id="wizPrev">上一步</button>
+          <span class="wizpos" id="wizPos">第 1 / 5 步</span>
+          <button class="btn primary" id="wizNext">下一步</button>
+        </div>
+      </div>
+
+      <!-- 右：结果 -->
+      <div class="resultcol" id="resultcol">
+        <div class="sticky">
+          <div class="result" id="resultBox">
+            <div class="empty">
+              <div class="ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </div>
+              <p>填好左侧评估信息，生成匹配人员、费用与任务清单</p>
+              <div class="steps3">
+                <div><i>1</i><span>第 5 步选择「期望服务类型」</span></div>
+                <div><i>2</i><span>结果在右侧实时更新，无需反复点击</span></div>
+                <div><i>3</i><span>可复制摘要发给客户，或打印成报告</span></div>
+              </div>
+            </div>
+          </div>
+          <button class="btn primary big" id="btnMatch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+            生成匹配 · 报价 · 任务清单
+          </button>
+          <button class="btn primary big save-rec" id="btnSaveRec">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+            保存本次评估 · 存到记录
+          </button>
+          <div class="rowflex" style="justify-content:space-between;align-items:center">
+            <span class="mini" id="matchState"></span>
+            <span style="display:flex;gap:6px">
+              <button class="btn ghost sm" id="btnCopy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                复制摘要</button>
+              <button class="btn ghost sm" id="btnQuote">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
+                报价单导出</button>
+              <button class="btn ghost sm" id="btnWork">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                工作内容导出</button>
+              <button class="btn ghost sm" id="btnPrint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                打印 / 导出 PDF</button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ② 护工名册 ============ -->
+  <section class="tabpane" id="pane-roster">
+    <div class="lockoverlay" id="lock-roster"><div class="lockcard">
+      <div class="lockicon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="locktitle">管理员专用 · 护工名册</div>
+      <div class="lockhint">此模块仅管理员可修改，防止分享后被他人改动。请输入管理员密码解锁。</div>
+      <div class="lockrow"><input class="lockpwd" type="password" placeholder="请输入管理员密码" /><button class="lockbtn" data-pane="roster">解锁</button></div>
+      <div class="lockerr"></div>
+    </div></div>
+    <div class="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      当前名册为<b>示例数据</b>，仅用于演示。要让匹配真正精准，请替换为<b>你机构/本地真实的护理员</b>：姓名、性别、可承担护理等级、技能标签、证书、经验年限。改完会自动保存在本机。
+    </div>
+    <div class="card">
+      <div class="ch"><h2>护理员名册</h2><span class="hint" style="margin-left:auto">技能标签用「、」或「,」分隔</span></div>
+      <div class="cb">
+        <div class="tblscroll">
+          <table class="grid2t" id="rosterTable"></table>
+        </div>
+        <div class="rowflex"><button class="btn addrow" id="btnAddWorker">＋ 新增护理员</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ③ 费率与规则 ============ -->
+  <section class="tabpane" id="pane-rules">
+    <div class="lockoverlay" id="lock-rules"><div class="lockcard">
+      <div class="lockicon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="locktitle">管理员专用 · 费率与规则</div>
+      <div class="lockhint">此模块仅管理员可修改，防止分享后被他人改动。请输入管理员密码解锁。</div>
+      <div class="lockrow"><input class="lockpwd" type="password" placeholder="请输入管理员密码" /><button class="lockbtn" data-pane="rules">解锁</button></div>
+      <div class="lockerr"></div>
+    </div></div>
+    <div class="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      默认费率以 <b>呼和浩特</b> 居家养老/护工公开市场行情为基准（2025–2026 综合，含家政创业圈报价参考、本地家政/招聘公开报价、美团等平台团购抽样）。要「价格准」，请把这里换成<b>智护星家政 / 美团门店的真实报价</b>。修改后自动保存。
+    </div>
+
+    <div class="sync-card" id="syncCard">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 12a9 9 0 0 1-9 9c-2.52 0-4.93-1-6.74-2.64L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 9-9c2.52 0 4.93 1 6.74 2.64L21 8"/><path d="M21 3v5h-5"/></svg>配置同步（管理员）</h3>
+      <p>规则、名册、权重定好后，点「复制同步包」发给我，即可更新线上配置；<b>所有已安装用户的 App 打开时会自动同步</b>到你的最新设置（离线时沿用上次同步的内容）。</p>
+      <div class="sync-meta" id="syncMeta">当前配置版本 v1 · 尚未发布同步</div>
+      <div class="sync-btns">
+        <button class="btn" id="btnCopyPack">复制同步包</button>
+        <button class="btn" id="btnDlPack">下载同步包文件</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><h2>基础月费（按服务类型）</h2><span class="hint" style="margin-left:auto">呼和浩特参考：住家 3500–7800 / 白班 3200–6200 元·月</span></div>
+      <div class="cb">
+        <div class="grid g2">
+          <div class="f"><label>住家（24 小时）元/月</label><input id="r_base_home" type="number" inputmode="numeric" /></div>
+          <div class="f"><label>白班（8–12 小时）元/月</label><input id="r_base_day" type="number" inputmode="numeric" /></div>
+          <div class="f"><label>钟点（半天及以下）元/小时</label><input id="r_base_hour" type="number" inputmode="numeric" /></div>
+          <div class="f"><label>临时/按需 元/天</label><input id="r_base_temp" type="number" inputmode="numeric" /></div>
+        </div>
+        <div class="formula" id="baseFormula"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2>护理等级系数</h2><span class="hint" style="margin-left:auto">自理越低、系数越高</span></div>
+      <div class="cb"><div class="grid g2" id="levelFactors"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2>专项护理加价（元/月）</h2><span class="hint" style="margin-left:auto">呼和浩特参考：专项护理 +400–800 元/项·月</span></div>
+      <div class="cb"><div class="grid g2" id="medicalPrices"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2>夜间 / 风险 / 做饭 / 中介</h2></div>
+      <div class="cb">
+        <div class="grid g3" id="nightPrices"></div>
+        <div class="grid g3" style="margin-top:12px" id="riskPrices"></div>
+        <div class="grid g2" style="margin-top:12px" id="cookPrices"></div>
+        <div class="grid g2" style="margin-top:12px">
+          <div class="f"><label>中介/服务费（相当于几个月工资，一次性）</label><input id="r_agency" type="number" inputmode="decimal" step="0.5" /></div>
+          <div class="f"><label>每日计费天数基准（月）</label><input id="r_monthdays" type="number" inputmode="decimal" step="0.01" /></div>
+          <div class="f"><label>每月基准服务天数（住家/白班，默认 26 天、休 4 天）</label><input id="r_basedays" type="number" inputmode="numeric" /></div>
+          <div class="f"><label>每多服务 1 天加价（元/天）</label><input id="r_extrafee" type="number" inputmode="numeric" /></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><h2>报价单抬头</h2><span class="hint" style="margin-left:auto">显示在导出的报价单 / 工作安排单上</span></div>
+      <div class="cb">
+        <div class="grid g2">
+          <div class="f"><label>机构名称</label><input id="r_orgname" placeholder="如 智护星家政" autocomplete="off" /></div>
+          <div class="f"><label>联系电话（选填）</label><input id="r_orgtel" placeholder="如 0471-xxxxxxx" autocomplete="off" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ④ 匹配权重 ============ -->
+  <section class="tabpane" id="pane-weights">
+    <div class="lockoverlay" id="lock-weights"><div class="lockcard">
+      <div class="lockicon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="locktitle">管理员专用 · 匹配权重</div>
+      <div class="lockhint">此模块仅管理员可修改，防止分享后被他人改动。请输入管理员密码解锁。</div>
+      <div class="lockrow"><input class="lockpwd" type="password" placeholder="请输入管理员密码" /><button class="lockbtn" data-pane="weights">解锁</button></div>
+      <div class="lockerr"></div>
+    </div></div>
+    <div class="note info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      匹配采用<b>加权评分</b>（不是硬性过滤）：每个维度给 0–100 分，再按权重汇总成「匹配度」。想更看重某方面（如资质、技能），调高其权重即可。权重会自动归一化，无需凑满 100。
+    </div>
+    <div class="card">
+      <div class="ch"><h2>匹配维度权重</h2></div>
+      <div class="cb"><div class="grid g2" id="weightBox"></div>
+        <div class="formula" id="weightFormula"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ⑤ 评估记录 ============ -->
+  <section class="tabpane" id="pane-records">
+    <div class="recs-head">
+      <h2>评估记录</h2>
+      <span class="hint">每次点「保存本次评估」，报价、任务清单与护工匹配都会分别存到这里</span>
+    </div>
+    <div id="recordsBox"></div>
+  </section>
+
+  <div class="footer">居家照护评估 · 智能匹配与报价系统 — 纯前端离线工具，数据仅存于本机浏览器</div>
+</main>
+
+<!-- 手机端底部导航 -->
+<nav class="bnav" id="bnav">
+  <button class="bi on" data-tab="assess">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg>
+    <span>评估</span>
+  </button>
+  <button class="bi" data-tab="roster">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>名册</span>
+  </button>
+  <button class="bi" data-tab="rules">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.42 0l8.58-8.58a1 1 0 0 0 0-1.42Z"/><path d="M7 7h.01"/></svg>
+    <span>规则</span>
+  </button>
+  <button class="bi" data-tab="weights">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/></svg>
+    <span>权重</span>
+  </button>
+  <button class="bi" data-tab="records">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+    <span>记录</span>
+  </button>
+</nav>
+
+<!-- 手机端悬浮生成按钮 -->
+<button class="fab" id="fabRun">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-2 8h6l-4 12H3l4-12H5Z"/></svg>
+  生成匹配 · 报价
+</button>
+
+<!-- 手机端悬浮：查看结果 -->
+<button class="btn primary float-result" id="btnFloatResult" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+  查看评估结果
+</button>
+
+<!-- 保存后询问是否清空 -->
+<div class="sheet-modal" id="askModal" hidden>
+  <div class="sheet-backdrop" id="askBackdrop"></div>
+  <div class="sheet-panel ask-panel">
+    <div class="ask-ic">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+    </div>
+    <div class="ask-tt">已保存到评估记录</div>
+    <div class="ask-tx">报价、任务清单与护工匹配都已存入「评估记录」。是否清空表单，开始评估下一位？</div>
+    <div class="ask-acts">
+      <button class="btn ghost" id="askLater">留着我再看看</button>
+      <button class="btn primary" id="askClear">清空，评估下一位</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 报价单 / 工作安排单 导出模态 ============ -->
+<div class="sheet-modal" id="sheetModal" hidden>
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="sheet-panel">
+    <div class="sheet-tools">
+      <div class="sheet-tt" id="sheetTitle">报价单</div>
+      <div class="sheet-acts">
+        <button class="btn sm" id="sheetPrint">打印 / 存 PDF</button>
+        <button class="btn sm" id="sheetPng">导出图片</button>
+        <button class="btn sm" id="sheetTxt" style="display:none">导出文本</button>
+        <button class="btn ghost sm" id="sheetClose">关闭</button>
+      </div>
+    </div>
+    <div class="sheet-scroll" id="sheetScroll"><div id="sheetBody"></div></div>
+  </div>
+</div>
+
+<input type="file" id="jsonInput" accept=".json,application/json" style="display:none" />
+<div id="toastWrap"></div>
+
+<script>
+/* =========================================================
+   居家照护评估 · 智能匹配与报价系统 v2
+   数据模型与计算逻辑与 v1 完全兼容；交互与呈现全新升级
+   ========================================================= */
+(function(){
+"use strict";
+/* 平台角标清理：若托管平台把「豆包工作生成」等角标注入到页面 DOM，立即移除并持续监听 */
+(function(){
+  function killBadge(){
+    try{
+      if(!document.body) return;
+      var all = document.querySelectorAll("body *");
+      for(var i=0;i<all.length;i++){
+        var el = all[i];
+        if(el.children && el.children.length) continue;
+        var t = el.textContent || "";
+        if(/豆包工作|豆包生成|工作生成|由豆包/.test(t) && t.length < 40){
+          var p = el, removed = false;
+          for(var d=0; d<5 && p; d++){
+            var cs = getComputedStyle(p);
+            if(cs.position === "fixed" || cs.position === "absolute"){
+              if(p.parentNode){ p.parentNode.removeChild(p); removed = true; }
+              break;
+            }
+            p = p.parentElement;
+          }
+          if(!removed && p && p.parentNode) p.parentNode.removeChild(p);
+          return;
+        }
+      }
+    }catch(e){}
+  }
+  if(document.body){ killBadge(); }
+  try{
+    new MutationObserver(function(){ killBadge(); })
+      .observe(document.documentElement, {childList:true, subtree:true});
+  }catch(e){}
+})();
+/* 固化用：在脚本改动 DOM 之前，先保存一份原始 HTML，确保生成的「锁定版」不含运行时生成的重复节点 */
+let PRISTINE_HTML = null;
+try{ PRISTINE_HTML = "<!DOCTYPE html>\n" + document.documentElement.outerHTML; }catch(e){}
+const $ = id => document.getElementById(id);
+const LSKEY  = "care-match-config-v2";
+const LSFORM = "care-match-form-v2";
+
+/* ---------- 1. 默认数据（可在界面修改） ---------- */
+const ADL_ITEMS = [
+  {k:"eat",  n:"进食",                 a:"进食",           opts:["独立","需协助","依赖","流食"]},
+  {k:"bath", n:"洗澡",                 a:"洗澡|擦浴",       opts:["独立","需协助","依赖"]},
+  {k:"groom",n:"修饰（洗脸/刷牙/梳头）", a:"修饰|洗脸",       opts:["独立","需协助","依赖"]},
+  {k:"dress",n:"穿衣",                 a:"穿衣",           opts:["独立","需协助","依赖"]},
+  {k:"stool",n:"控制大便",             a:"大便",           opts:["能控制","偶尔失禁","失禁"]},
+  {k:"urine",n:"控制小便",             a:"小便",           opts:["能控制","偶尔失禁","失禁"]},
+  {k:"toilet",n:"如厕",                a:"如厕",           opts:["独立","需协助","依赖"]},
+  {k:"transfer",n:"床椅转移",          a:"床椅转移|转移",   opts:["独立","需协助","依赖"]},
+  {k:"walk", n:"平地行走",             a:"平地行走|行走",   opts:["独立","需协助","依赖"]},
+  {k:"stair",n:"上下楼梯",             a:"上下楼梯|楼梯",   opts:["独立","需协助","依赖"]}
+];
+const NEEDS = ["鼻饲/胃管护理","导尿管护理","压疮/褥疮护理","吸痰护理","伤口换药护理","注射/胰岛素","生命体征监测","康复训练协助","夜间起夜照护","吸氧护理"];
+const LEVELS = ["无","低","中","高"];
+const SELFCARE = ["完全自理","轻度依赖","中度依赖","重度依赖"];
+const NIGHTS = ["无","偶尔","经常","整夜"];
+const SERVICES = ["住家(24小时)","白班(8-12小时)","钟点(半天及以下)","临时/按需"];
+const GENDER_REQS = ["不限","女","男"];
+const COOKS = ["不需要","一顿饭","两顿饭"];
+
+const DEFAULT_ROSTER = [
+  {id:"w1", name:"王秀兰", gender:"女", age:48, levels:["完全自理","轻度依赖"],
+   skills:["生活照护","喂食协助","如厕护理","助浴","用药提醒","膳食","陪同就医","慢病监测","陪同外出","陪伴交流"],
+   certs:["养老护理员三级","健康证"], years:12, note:"基础生活照护、慢病提醒、陪同就医"},
+  {id:"w2", name:"李秀芳", gender:"女", age:45, levels:["轻度依赖","中度依赖"],
+   skills:["生活照护","喂食协助","如厕护理","助浴","翻身拍背","转移辅助","用药提醒","康复协助","压疮预防","夜间照护"],
+   certs:["养老护理员二级","康复辅具证","健康证"], years:15, note:"半失能照护、体位转移、康复协助"},
+  {id:"w3", name:"张秀兰", gender:"女", age:51, levels:["中度依赖","重度依赖"],
+   skills:["生活照护","喂食协助","如厕护理","翻身拍背","转移辅助","鼻饲/胃管护理","导尿管护理","压疮/褥疮护理","吸痰护理","生命体征监测","夜间照护","失能照护","认知障碍照护"],
+   certs:["养老护理员一级","护士资格证","健康证"], years:18, note:"失能/失智、管道护理、压疮防治"},
+  {id:"w4", name:"陈丽华", gender:"女", age:43, levels:["重度依赖"],
+   skills:["生活照护","如厕护理","翻身拍背","转移辅助","伤口换药护理","注射/胰岛素","生命体征监测","康复协助","导尿管护理","吸氧护理","失能照护"],
+   certs:["护士执业证","康复治疗师","健康证"], years:10, note:"术后康复、专业医疗照护、管道护理"},
+  {id:"w5", name:"赵小梅", gender:"女", age:39, levels:["完全自理","轻度依赖"],
+   skills:["生活照护","膳食","保洁","陪同外出","陪伴交流","用药提醒","慢病监测"],
+   certs:["养老护理员三级","健康证"], years:8, note:"日常陪伴、家务、轻度照护"}
+];
+
+/* 默认费率：以「呼和浩特」居家养老/护工公开市场行情为基准（2025–2026 综合）
+   数据来源：家政创业圈·呼和浩特护工报价参考、呼和浩特本地家政/招聘公开报价、美团/抖音等平台团购抽样
+   说明：均为示例参考值，请按你机构（智护星家政/美团门店）真实报价在「③ 费率与规则」里改。 */
+const DEFAULT_RULES = {
+  base:{ home:4200, day:3600, hour:40, temp:240 },
+  levelFactor:{ "完全自理":0.90, "轻度依赖":1.12, "中度依赖":1.40, "重度依赖":1.72 },
+  medical:{ "鼻饲/胃管护理":800,"导尿管护理":700,"压疮/褥疮护理":800,"吸痰护理":800,"伤口换药护理":500,"注射/胰岛素":600,"生命体征监测":300,"康复训练协助":500,"夜间起夜照护":400,"吸氧护理":400 },
+  night:{ "无":0, "偶尔":350, "经常":800, "整夜":1400 },
+  risk:{ "无":0, "低":80, "中":250, "高":500 },
+  cook:{ "不需要":0, "一顿饭":250, "两顿饭":500 },
+  agency:1, monthDays:30, baseServiceDays:26, extraDayFee:150
+};
+
+const DEFAULT_WEIGHTS = { level:22, skill:22, cert:13, medical:13, exp:8, gender:12, cook:10 };
+const WDIM = {
+  level:{t:"护理等级适配", d:"候选人可承担等级与本案等级是否吻合（相邻等级按部分分）"},
+  skill:{t:"技能覆盖", d:"本案所需生活/护理技能，候选人标签覆盖比例"},
+  cert:{t:"资质证书", d:"本案医疗需求要求的证书，候选人是否具备"},
+  medical:{t:"医疗护理能力", d:"鼻饲/导尿/吸痰等专项医疗护理覆盖"},
+  exp:{t:"经验匹配", d:"从业年限相对本案等级所需年限"},
+  gender:{t:"性别要求", d:"候选性别是否符合客户对护工的性别要求"},
+  cook:{t:"做饭能力", d:"候选是否具备膳食/做饭技能，匹配客户做饭要求"}
+};
+
+/* ---------- 2. 状态 ---------- */
+let ROSTER = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+let RULES  = JSON.parse(JSON.stringify(DEFAULT_RULES));
+let WEIGHTS= JSON.parse(JSON.stringify(DEFAULT_WEIGHTS));
+let EVAL = {};           // 评估数据
+let ADL  = {};           // {k:选择}
+let NEEDSET = {};        // {need:true}
+let RISK = { fall:"", wander:"", pressure:"" };
+let SELF = "", NIGHT = "", SVC = "", GENDER_REQ = "", COOK_REQ = "";
+
+/* ---------- 配置云端同步（管理员发布 → 客户端自动拉取） ---------- */
+const LSVER = "care-match-cfg-ver";
+function cfgVer(){ try{ return parseInt(localStorage.getItem(LSVER)||"0",10)||0; }catch(e){ return 0; } }
+function setCfgVer(v){ try{ localStorage.setItem(LSVER, String(v)); }catch(e){} }
+function cfgSavedAt(){ try{ return localStorage.getItem("care-cfg-savedAt")||""; }catch(e){ return ""; } }
+function syncMetaText(){
+  const v = cfgVer(), t = cfgSavedAt();
+  return "当前配置版本 v" + v + (t ? " · 最近发布 " + t : " · 尚未发布同步");
+}
+function refreshSyncMeta(){
+  const el = $("syncMeta"); if(el) el.textContent = syncMetaText();
+}
+function buildSyncPack(){
+  return { app:"居家照护评估配置", version:cfgVer(), savedAt:cfgSavedAt(), ROSTER, RULES, WEIGHTS };
+}
+function fallbackCopy(txt, done){
+  const ta = document.createElement("textarea");
+  ta.value = txt; ta.style.cssText = "position:fixed;opacity:0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ toast("复制失败，请长按手动复制","bad"); }
+  ta.remove();
+}
+function copySyncPack(){
+  const txt = JSON.stringify(buildSyncPack());
+  const done = ()=>{ toast("同步包已复制，发给我即可更新线上配置","ok"); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));
+  } else fallbackCopy(txt,done);
+}
+function downloadSyncPack(){
+  const pack = buildSyncPack();
+  const blob = new Blob([JSON.stringify(pack,null,1)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "护工配置同步包_v" + pack.version + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  toast("同步包已下载，发给我即可更新线上配置","ok");
+}
+function applyRemotePack(o){
+  if(o.ROSTER) ROSTER = o.ROSTER;
+  if(o.RULES)  RULES  = Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES)), o.RULES);
+  if(o.WEIGHTS)WEIGHTS= Object.assign(JSON.parse(JSON.stringify(DEFAULT_WEIGHTS)), o.WEIGHTS);
+  save();
+  setCfgVer(Math.max(cfgVer(), parseInt(o.version||"0",10)));
+  if(o.savedAt){ try{ localStorage.setItem("care-cfg-savedAt", o.savedAt); }catch(e){} }
+  renderRoster(); renderRules(); renderWeights(); refreshSyncMeta();
+  toast("已同步管理员最新配置（规则/名册/权重）","ok");
+}
+async function pullRemoteConfig(){
+  try{
+    const r = await fetch("./config.json?v=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) return;
+    const o = await r.json();
+    const rv = parseInt(o.version||"0",10)||0;
+    const lv = cfgVer();
+    if(rv <= lv) return;
+    const hasLocal = !!localStorage.getItem(LSKEY);
+    if(lv===0 && hasLocal){
+      /* 老用户首次升级：本地已设好，保留本地，仅标记版本避免被覆盖 */
+      setCfgVer(rv);
+      if(o.savedAt){ try{ localStorage.setItem("care-cfg-savedAt", o.savedAt); }catch(e){} }
+      refreshSyncMeta();
+    } else {
+      applyRemotePack(o);
+    }
+  }catch(e){ /* 离线或不可达：继续用本地配置 */ }
+}
+
+/* ---------- 费率固化（锁定版） ---------- */
+let FROZEN = null; // FROZEN_CONFIG —— 若为对象（含 rules），则费率与规则被永久固化，任何人不可修改
+function isFrozenRules(){ return !!(FROZEN && FROZEN.rules); }
+function applyFrozen(){
+  if(isFrozenRules()){
+    RULES = Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES)), JSON.parse(JSON.stringify(FROZEN.rules)));
+  }
+}
+/* 结构对齐：确保费率各子项与默认项一致（如做饭项改为「一顿饭 / 两顿饭」，自动清理旧键） */
+function syncFixedObj(defs, cur){
+  const out = {};
+  Object.keys(defs).forEach(k=>{ out[k] = (cur && cur[k]!==undefined) ? cur[k] : defs[k]; });
+  return out;
+}
+function syncRules(){
+  RULES.base        = Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES.base)), RULES.base||{});
+  RULES.levelFactor = syncFixedObj(DEFAULT_RULES.levelFactor, RULES.levelFactor);
+  RULES.medical     = syncFixedObj(DEFAULT_RULES.medical, RULES.medical);
+  RULES.night       = syncFixedObj(DEFAULT_RULES.night, RULES.night);
+  RULES.risk        = syncFixedObj(DEFAULT_RULES.risk, RULES.risk);
+  RULES.cook        = syncFixedObj(DEFAULT_RULES.cook, RULES.cook);
+  if(RULES.agency===undefined) RULES.agency = DEFAULT_RULES.agency;
+  if(RULES.monthDays===undefined) RULES.monthDays = DEFAULT_RULES.monthDays;
+  if(RULES.baseServiceDays===undefined) RULES.baseServiceDays = DEFAULT_RULES.baseServiceDays;
+  if(RULES.extraDayFee===undefined) RULES.extraDayFee = DEFAULT_RULES.extraDayFee;
+}
+
+function save(){
+  try{
+    localStorage.setItem(LSKEY, JSON.stringify({ROSTER,RULES,WEIGHTS}));
+    setCfgVer((cfgVer()||0)+1); // 配置版本自增，供云端同步比对
+  }catch(e){}
+}
+function load(){
+  try{
+    const s = localStorage.getItem(LSKEY);
+    if(s){
+      const o = JSON.parse(s);
+      if(o.ROSTER) ROSTER = o.ROSTER;
+      if(o.RULES)  RULES  = Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES)), o.RULES);
+      if(o.WEIGHTS)WEIGHTS= Object.assign(JSON.parse(JSON.stringify(DEFAULT_WEIGHTS)), o.WEIGHTS);
+    }
+  }catch(e){}
+  applyFrozen(); // 固化优先，覆盖任何本地/导入值
+  syncRules();   // 结构对齐（做饭项：一顿饭 / 两顿饭）
+}
+
+/* ---------- 评估表单的本地保存（刷新不丢） ---------- */
+function saveForm(){
+  try{
+    const data = { fields:{}, ADL, NEEDSET, RISK, SELF, NIGHT, SVC, GENDER_REQ, COOK_REQ };
+    ["f_name","f_gender","f_age","f_weight","f_live","f_diag","f_chronic","f_surgery","f_med",
+     "f_insulin","f_insulin_time","f_oral","f_oral_time","f_monitor","f_othercare","f_consc","f_cog","f_sense",
+     "f_days","f_hours","f_start","f_ageReq","f_cookWhat","f_cannot"].forEach(id=>{
+      const el=$(id); if(el) data.fields[id]=el.value;
+    });
+    localStorage.setItem(LSFORM, JSON.stringify(data));
+  }catch(e){}
+}
+function loadForm(){
+  try{
+    const s=localStorage.getItem(LSFORM); if(!s) return;
+    const o=JSON.parse(s);
+    if(o.fields) Object.keys(o.fields).forEach(id=>{ const el=$(id); if(el && o.fields[id]!=null) el.value=o.fields[id]; });
+    if(o.ADL) ADL=o.ADL;
+    if(o.NEEDSET) NEEDSET=o.NEEDSET;
+    if(o.RISK) RISK=Object.assign({fall:"",wander:"",pressure:""}, o.RISK);
+    if(o.SELF!=null) SELF=o.SELF;
+    if(o.NIGHT!=null) NIGHT=o.NIGHT;
+    if(o.SVC!=null) SVC=o.SVC;
+    if(o.GENDER_REQ!=null) GENDER_REQ=o.GENDER_REQ;
+    if(o.COOK_REQ!=null) COOK_REQ=o.COOK_REQ;
+  }catch(e){}
+}
+
+/* ---------- 3. 渲染评估表单 ---------- */
+function chipRow(container, opts, onPick, cls){
+  container.innerHTML = "";
+  opts.forEach(o=>{
+    const b = document.createElement("button");
+    b.type="button"; b.className="chip"+(cls?" "+cls:""); b.textContent=o; b.dataset.v=o;
+    b.setAttribute("aria-pressed","false");
+    b.addEventListener("click",()=>{ onPick(o, b, container); saveForm(); scheduleAutoRun(); });
+    container.appendChild(b);
+  });
+}
+function renderADL(){
+  const box = $("adlBox"); box.innerHTML="";
+  ADL_ITEMS.forEach(it=>{
+    const row = document.createElement("div"); row.className="row";
+    row.innerHTML = `<div class="nm">${it.n}</div>`;
+    const chips = document.createElement("div"); chips.className="chips";
+    chipRow(chips, it.opts, (v,btn,c)=>{ ADL[it.k]=v; toggleOn(c,btn); });
+    row.appendChild(chips); box.appendChild(row);
+  });
+}
+function toggleOn(c, btn){
+  c.querySelectorAll(".chip").forEach(x=>{ x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+  if(btn){ btn.classList.add("on"); btn.setAttribute("aria-pressed","true"); }
+}
+function renderNeeds(){
+  const box=$("needsBox"); box.innerHTML="";
+  NEEDS.forEach(n=>{
+    const l=document.createElement("label"); l.className="needchk";
+    l.innerHTML=`<input type="checkbox" data-need="${n}"><span>${n}</span>`;
+    const cb=l.querySelector("input");
+    cb.addEventListener("change",()=>{ NEEDSET[n]=cb.checked; l.classList.toggle("on",cb.checked); saveForm(); scheduleAutoRun(); });
+    box.appendChild(l);
+  });
+}
+function renderAllChips(){
+  document.querySelectorAll('[data-risk]').forEach(c=>{
+    const key=c.dataset.risk;
+    chipRow(c, LEVELS, (v,btn,cont)=>{ RISK[key]= (RISK[key]===v? "" : v); toggleOn(cont, RISK[key]?btn:null); });
+  });
+  chipRow($("selfcareBox"), SELFCARE, (v,btn,cont)=>{ SELF = (SELF===v? "":v); toggleOn(cont, SELF?btn:null); });
+  chipRow($("nightBox"), NIGHTS, (v,btn,cont)=>{ NIGHT = (NIGHT===v? "":v); toggleOn(cont, NIGHT?btn:null); });
+  chipRow($("svcBox"), SERVICES, (v,btn,cont)=>{ SVC = (SVC===v? "":v); toggleOn(cont, SVC?btn:null); });
+  chipRow($("genderReqBox"), GENDER_REQS, (v,btn,cont)=>{ GENDER_REQ = (GENDER_REQ===v? "":v); toggleOn(cont, GENDER_REQ?btn:null); });
+  chipRow($("cookReqBox"), COOKS, (v,btn,cont)=>{ COOK_REQ = (COOK_REQ===v? "":v); toggleOn(cont, COOK_REQ?btn:null); });
+}
+
+/* ---------- 4. 渲染名册 ---------- */
+const CERT_LIB = ["养老护理员三级","养老护理员二级","养老护理员一级","护士资格证","护士执业证","康复辅具证","康复治疗师","急救证","健康证"];
+function renderRoster(){
+  const t = $("rosterTable");
+  t.innerHTML = `<thead><tr>
+    <th style="min-width:74px">姓名</th><th style="min-width:46px">性别</th><th style="min-width:54px">年龄</th>
+    <th style="min-width:150px">可承担护理等级</th><th style="min-width:250px">技能标签</th>
+    <th style="min-width:180px">证书</th><th style="min-width:60px">经验(年)</th>
+    <th style="min-width:150px">备注</th><th></th></tr></thead>`;
+  const tb=document.createElement("tbody");
+  ROSTER.forEach((w,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML = `
+      <td><input value="${esc(w.name)}" data-i="${i}" data-f="name"></td>
+      <td><select data-i="${i}" data-f="gender"><option ${w.gender==="女"?"selected":""}>女</option><option ${w.gender==="男"?"selected":""}>男</option></select></td>
+      <td><input type="number" value="${w.age||""}" data-i="${i}" data-f="age"></td>
+      <td><input value="${esc((w.levels||[]).join("、"))}" data-i="${i}" data-f="levels" placeholder="如 轻度依赖、中度依赖"></td>
+      <td><input value="${esc((w.skills||[]).join("、"))}" data-i="${i}" data-f="skills" placeholder="技能用、分隔"></td>
+      <td><input value="${esc((w.certs||[]).join("、"))}" data-i="${i}" data-f="certs" placeholder="证书用、分隔"></td>
+      <td><input type="number" value="${w.years||""}" data-i="${i}" data-f="years"></td>
+      <td><input value="${esc(w.note||"")}" data-i="${i}" data-f="note"></td>
+      <td><button class="del" data-del="${i}" title="删除">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button></td>`;
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  t.querySelectorAll("input,select").forEach(el=>{
+    el.addEventListener("change",()=>{
+      const i=+el.dataset.i, f=el.dataset.f; let v=el.value;
+      if(f==="levels"||f==="skills"||f==="certs") v = v.split(/[、,，;；]/).map(s=>s.trim()).filter(Boolean);
+      else if(f==="age"||f==="years") v = v===""? "" : Number(v);
+      ROSTER[i][f]=v; save();
+    });
+  });
+  t.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+    ROSTER.splice(+b.dataset.del,1); save(); renderRoster();
+  }));
+}
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+/* ---------- 5. 渲染费率 ---------- */
+function renderRules(){
+  $("r_base_home").value = RULES.base.home;
+  $("r_base_day").value  = RULES.base.day;
+  $("r_base_hour").value = RULES.base.hour;
+  $("r_base_temp").value = RULES.base.temp;
+  $("r_agency").value    = RULES.agency;
+  $("r_monthdays").value = RULES.monthDays;
+  $("r_basedays").value   = RULES.baseServiceDays;
+  $("r_extrafee").value   = RULES.extraDayFee;
+  [["r_base_home","home"],["r_base_day","day"],["r_base_hour","hour"],["r_base_temp","temp"]].forEach(([id,k])=>{
+    $(id).oninput = ()=>{ RULES.base[k]=Number($(id).value)||0; save(); showBaseFormula(); };
+  });
+  $("r_agency").oninput = ()=>{ RULES.agency=Number($("r_agency").value)||0; save(); };
+  $("r_monthdays").oninput = ()=>{ RULES.monthDays=Number($("r_monthdays").value)||30; save(); };
+  $("r_basedays").oninput = ()=>{ RULES.baseServiceDays=Number($("r_basedays").value)||26; save(); showBaseFormula(); };
+  $("r_extrafee").oninput = ()=>{ RULES.extraDayFee=Number($("r_extrafee").value)||0; save(); showBaseFormula(); };
+
+  $("r_orgname").value = ORG.name;
+  $("r_orgtel").value = ORG.tel;
+  $("r_orgname").oninput = ()=>{ ORG.name=$("r_orgname").value.trim(); saveOrg(); };
+  $("r_orgtel").oninput = ()=>{ ORG.tel=$("r_orgtel").value.trim(); saveOrg(); };
+
+  const lf=$("levelFactors"); lf.innerHTML="";
+  Object.keys(RULES.levelFactor).forEach(k=>{
+    lf.appendChild(field(k+" 系数", RULES.levelFactor[k], v=>{ RULES.levelFactor[k]=v; save(); }, 0.01));
+  });
+  const mp=$("medicalPrices"); mp.innerHTML="";
+  NEEDS.forEach(k=>{
+    mp.appendChild(field(k+" (元/月)", RULES.medical[k], v=>{ RULES.medical[k]=v; save(); }));
+  });
+  const np=$("nightPrices"); np.innerHTML="";
+  Object.keys(RULES.night).forEach(k=>{
+    np.appendChild(field("夜间·"+k+" (元/月)", RULES.night[k], v=>{ RULES.night[k]=v; save(); }));
+  });
+  const rp=$("riskPrices"); rp.innerHTML="";
+  Object.keys(RULES.risk).forEach(k=>{
+    rp.appendChild(field("风险·"+k+" (元/月)", RULES.risk[k], v=>{ RULES.risk[k]=v; save(); }));
+  });
+  const rc=$("cookPrices"); rc.innerHTML="";
+  Object.keys(RULES.cook).forEach(k=>{
+    rc.appendChild(field("做饭·"+k+" 加价 (元/月)", RULES.cook[k], v=>{ RULES.cook[k]=v; save(); }));
+  });
+  showBaseFormula();
+  applyRulesFrozenState();
+}
+function field(label, val, cb, step){
+  const d=document.createElement("div"); d.className="f";
+  d.innerHTML=`<label>${esc(label)}</label><input type="number" ${step?`step="${step}"`:""} value="${val}">`;
+  d.querySelector("input").oninput=e=>cb(Number(e.target.value)||0);
+  return d;
+}
+function showBaseFormula(){
+  $("baseFormula").textContent =
+`月费 = 基础月费 × 护理等级系数 + Σ专项护理加价 + 夜间加价 + 风险加价 + 做饭加价
+钟点：基础月费 = ${RULES.base.hour} 元/时 × 每日时长 × 每周天数 × 30/7
+临时：基础月费 = ${RULES.base.temp} 元/天 × 每周天数 × 30/7
+住家/白班：基础月费 = 上表月费（已含整月）；每月基准 ${RULES.baseServiceDays} 天（休 4 天），每多服务 1 天 +${RULES.extraDayFee} 元`;
+}
+
+/* ---------- 6. 渲染权重 ---------- */
+function renderWeights(){
+  const b=$("weightBox"); b.innerHTML="";
+  Object.keys(WDIM).forEach(k=>{
+    const d=document.createElement("div"); d.className="f";
+    d.innerHTML=`<label>${WDIM[k].t} <span class="hint">— ${WDIM[k].d}</span></label>
+      <input type="number" min="0" max="100" value="${WEIGHTS[k]}" data-w="${k}">`;
+    d.querySelector("input").oninput=e=>{ WEIGHTS[k]=Number(e.target.value)||0; save(); showWeightFormula(); };
+    b.appendChild(d);
+  });
+  showWeightFormula();
+}
+function showWeightFormula(){
+  const sum = Object.values(WEIGHTS).reduce((a,b)=>a+(+b||0),0)||1;
+  const parts = Object.keys(WDIM).map(k=>`${WDIM[k].t} ${(WEIGHTS[k]/sum*100).toFixed(0)}%`);
+  $("weightFormula").textContent = "归一化后权重：" + parts.join("　|　");
+}
+
+/* ---------- 管理员密码锁 ---------- */
+const ADMIN_PASS = "951652";
+const ADMIN_TABS = ["roster","rules","weights"];
+const UNLOCK = {}; // 会话内解锁状态（关闭页面即失效）
+function isLocked(tab){ return ADMIN_TABS.includes(tab) && !UNLOCK[tab]; }
+function applyLock(tab){
+  if(!ADMIN_TABS.includes(tab)) return;
+  const ov = $("lock-"+tab); if(!ov) return;
+  if(tab==="rules" && isFrozenRules()){ ov.style.display="none"; applyRulesFrozenState(); return; }
+  ov.style.display = UNLOCK[tab] ? "none" : "flex";
+}
+function lockIcon(locked){
+  const w=' style="width:11px;height:11px;vertical-align:-1px"';
+  return locked
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"${w}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"${w}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+}
+function updateTabLocks(){
+  document.querySelectorAll(".tab").forEach(t=>{
+    const s = t.querySelector(".locksym");
+    if(!s) return;
+    const tab = t.dataset.tab;
+    s.innerHTML = ADMIN_TABS.includes(tab) ? lockIcon(!UNLOCK[tab]) : "";
+  });
+}
+function tryUnlock(tab){
+  const pane = $("pane-"+tab); if(!pane) return;
+  const inp = pane.querySelector(".lockpwd");
+  const err = pane.querySelector(".lockerr");
+  const val = (inp && inp.value || "").trim();
+  if(val === ADMIN_PASS){
+    UNLOCK[tab] = true;
+    if(err) err.textContent = "";
+    applyLock(tab); updateTabLocks();
+    toast("已解锁："+ (tab==="roster"?"护工名册":tab==="rules"?"费率与规则":"匹配权重"), "ok");
+  } else {
+    if(err) err.textContent = "密码错误，请重试。";
+    if(inp){ inp.value=""; inp.focus(); }
+  }
+}
+
+/* ---------- 费率固化：只读渲染 + 生成锁定版 ---------- */
+function applyRulesFrozenState(){
+  const pane = $("pane-rules"); if(!pane) return;
+  const frozen = isFrozenRules();
+  let banner = pane.querySelector(".frozenbanner");
+  if(frozen){
+    if(!banner){
+      banner = document.createElement("div");
+      banner.className = "frozenbanner";
+      const note = pane.querySelector(".note");
+      if(note && note.parentNode) note.parentNode.insertBefore(banner, note);
+      else pane.insertBefore(banner, pane.firstChild);
+    }
+    const fdate = (FROZEN && FROZEN.frozenAt) ? (" · 固化时间 " + FROZEN.frozenAt.slice(0,10)) : "";
+    banner.innerHTML = lockIcon(true) + " <b>费率与规则已固化</b>：本文件中的费率随文件一同分发，任何人（含管理员）均不可修改，也不会因重置或导入而改变。" + fdate;
+  } else if(banner){ banner.remove(); }
+  pane.querySelectorAll("input,select,textarea").forEach(el=>{ el.disabled = frozen; });
+}
+
+function adminUnlocked(){ return ADMIN_TABS.some(t=>UNLOCK[t]); }
+function guardAdmin(){
+  if(adminUnlocked()) return true;
+  const val = (window.prompt("该项会修改「护工名册 / 费率与规则 / 匹配权重」，请输入管理员密码：")||"").trim();
+  if(val === ADMIN_PASS){ ADMIN_TABS.forEach(t=>{UNLOCK[t]=true; applyLock(t);}); updateTabLocks(); return true; }
+  if(val) toast("密码错误，已取消操作。","bad");
+  return false;
+}
+
+/* ---------- Toast ---------- */
+function toast(msg, type){
+  const w=$("toastWrap"); if(!w) return;
+  const t=document.createElement("div");
+  t.className="toast"+(type?" "+type:"");
+  t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .3s"; setTimeout(()=>t.remove(),320); }, 2400);
+}
+
+/* ---------- 页签切换（顶栏 + 底部导航共用） ---------- */
+function switchTab(tab){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active", x.dataset.tab===tab));
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.toggle("active", x.id==="pane-"+tab));
+  document.querySelectorAll("#bnav .bi").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
+  const fab=$("fabRun"); if(fab) fab.classList.toggle("show", tab==="assess");
+  if(tab==="records") renderRecords();
+  applyLock(tab);
+  const li = document.querySelector("#pane-"+tab+" .lockpwd");
+  if(li && isLocked(tab)) setTimeout(()=>li.focus(),30);
+}
+
+/* ---------- 手机端分步向导 ---------- */
+let stepNow = 1;
+function showStep(n){
+  stepNow = Math.max(1, Math.min(5, n));
+  document.querySelectorAll(".step").forEach(c=>c.classList.toggle("active", Number(c.dataset.step)===stepNow));
+  document.querySelectorAll("#stepsBar .sd").forEach(d=>{
+    const s=Number(d.dataset.step);
+    d.classList.toggle("on", s<=stepNow);
+    d.classList.toggle("cur", s===stepNow);
+  });
+  const pos=$("wizPos"); if(pos) pos.textContent="第 "+stepNow+" / 5 步";
+  const next=$("wizNext");
+  if(next){ next.textContent = stepNow>=5 ? "生成匹配 · 报价" : "下一步"; next.classList.toggle("primary", stepNow>=5); }
+  const prev=$("wizPrev"); if(prev) prev.disabled = stepNow<=1;
+  const sb=$("stepsBar");
+  if(sb && getComputedStyle(sb).display!=="none"){
+    const pane=$("pane-assess");
+    if(pane) pane.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+}
+
+/* ---------- 同步表单与状态（载入/示例填充后恢复界面） ---------- */
+function syncFormFromState(){
+  document.querySelectorAll("#adlBox .row").forEach((row,i)=>{
+    const it=ADL_ITEMS[i];
+    row.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on", c.dataset.v===ADL[it.k]));
+  });
+  document.querySelectorAll("#needsBox .needchk").forEach(l=>{
+    const n=l.querySelector("input").dataset.need;
+    l.querySelector("input").checked = !!NEEDSET[n];
+    l.classList.toggle("on", !!NEEDSET[n]);
+  });
+  document.querySelectorAll('[data-risk]').forEach(c=>{
+    const key=c.dataset.risk;
+    c.querySelectorAll(".chip").forEach(b=>b.classList.toggle("on", b.dataset.v===RISK[key]));
+  });
+  [[$("selfcareBox"),SELF],[$("nightBox"),NIGHT],[$("svcBox"),SVC],[$("genderReqBox"),GENDER_REQ],[$("cookReqBox"),COOK_REQ]].forEach(([box,val])=>{
+    if(!box) return;
+    box.querySelectorAll(".chip").forEach(b=>b.classList.toggle("on", b.dataset.v===val));
+  });
+}
+
+/* ---------- 安装引导横幅 ---------- */
+function initInstallBar(){
+  const bar = $("installBar"); if(!bar) return;
+  try{ if(localStorage.getItem("care-install-hint")==="1") return; }catch(e){}
+  const ua = navigator.userAgent;
+  const ios = /iphone|ipad|ipod/i.test(ua);
+  const android = /android/i.test(ua);
+  const wechat = /MicroMessenger/i.test(ua);
+  let standalone = false;
+  try{ standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || (navigator.standalone === true); }catch(e){}
+  if(standalone) return;
+  let msg = "";
+  if(wechat){
+    msg = ios ? "点右上角「···」→「在 Safari 中打开」→ 底部「分享」→「添加到主屏幕」" : "点右上角「···」→「在浏览器中打开」→ 浏览器「⋮」→「安装应用 / 添加到主屏幕」";
+  } else if(ios){
+    msg = "点底部「分享」按钮 →「添加到主屏幕」，桌面就会出现 App 图标";
+  } else if(android){
+    msg = "点右上角「⋮」→「安装应用 / 添加到主屏幕」，桌面就会出现 App 图标";
+  } else { return; }
+  $("ibMsg").textContent = msg;
+  bar.hidden = false;
+  $("ibClose").addEventListener("click", ()=>{ bar.hidden = true; try{ localStorage.setItem("care-install-hint","1"); }catch(e){} });
+}
+
+/* 手机端悬浮：查看结果 */
+function showFloatResult(show){
+  const b = $("btnFloatResult"); if(!b) return;
+  b.hidden = !show;
+  if(!show) return;
+  b.onclick = ()=>{ const r=$("resultcol"); if(r) r.scrollIntoView({behavior:"smooth", block:"start"}); };
+}
+
+/* ---------- 报价单 / 工作安排单 导出 ---------- */
+const ORGKEY = "care-org-v1";
+let ORG = { name:"智护星家政", tel:"" };
+function loadOrg(){ try{ const s=localStorage.getItem(ORGKEY); if(s){ const o=JSON.parse(s); if(o.name!=null) ORG.name=o.name; if(o.tel!=null) ORG.tel=o.tel; } }catch(e){} }
+function saveOrg(){ try{ localStorage.setItem(ORGKEY, JSON.stringify(ORG)); }catch(e){} }
+function sheetDate(){ return (EVAL && EVAL.start) || new Date().toISOString().slice(0,10); }
+function sheetNo(){ const d=sheetDate().replace(/-/g,""); return "Q" + d + "-" + String(Math.floor(Math.random()*900)+100); }
+
+function buildQuoteSheet(){
+  if(!LAST_RESULT){ toast("请先生成匹配结果","bad"); return; }
+  const { o, ranked, budget, tasks } = LAST_RESULT;
+  const p = EVAL;
+  const medRows = budget.medItems.length
+    ? budget.medItems.map(n=>`<tr><td>专项护理 · ${esc(n)}</td><td>+${money(RULES.medical[n]||0)}</td></tr>`).join("")
+    : `<tr><td>专项护理加价</td><td>+¥0</td></tr>`;
+  let html = `
+  <div class="sheet" id="quoteSheet">
+    <div class="s-org">
+      <div class="nm">${esc(ORG.name||"居家照护服务机构")}</div>
+      <div class="tt">居家照护服务报价单</div>
+      <div class="meta">单号 ${sheetNo()} · 日期 ${sheetDate()}${ORG.tel? " · 电话 "+esc(ORG.tel):""}</div>
+    </div>
+    <div class="s-sec">客户与评估信息</div>
+    <div class="s-row"><span>被照护人：${esc(p.name||"（未填）")}${p.gender? " · "+esc(p.gender):""}${p.age? " · "+esc(p.age)+"岁":""}${p.weight? " · "+esc(p.weight)+"kg":""}</span><span>居住情况：${esc(p.live||"—")}</span></div>
+    <div class="s-row"><span>主要疾病：${esc(p.diag||"—")}</span><span>用药情况：${esc(p.med||"—")}</span></div>
+    ${p.surgery? `<div class="s-row"><span>近期手术：${esc(p.surgery)}</span></div>`:""}
+    <div class="s-sec">服务方案</div>
+    <div class="s-row"><span>护理等级：<b>${esc(o.level)}</b></span><span>服务类型：<b>${esc(o.svc)}</b></span></div>
+    <div class="s-row"><span>每日时长：${esc(p.hours||"—")} 小时</span><span>每月天数：${esc(p.days||"—")} 天</span><span>开始日期：${sheetDate()}</span></div>
+    <div class="s-row"><span>夜间护理：${esc(NIGHT||"无")}</span><span>风险管控：跌倒${RISK.fall||"无"}/走失${RISK.wander||"无"}/压疮${RISK.pressure||"无"}</span><span>做饭要求：${esc(COOK_REQ||"不需要")}</span></div>
+    <div class="s-sec">费用明细（预估月费）</div>
+    <table>
+      <tr><td>基础月费（${esc(o.svc)}）</td><td>${money(budget.base)}</td></tr>
+      <tr><td>护理等级系数（${esc(o.level)}）</td><td>× ${budget.lf}</td></tr>
+      <tr><td>等级调整后基础费</td><td>${money(budget.base*budget.lf)}</td></tr>
+      ${medRows}
+      <tr><td>夜间护理加价（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>
+      <tr><td>风险管控加价</td><td>+${money(budget.riskSum)}</td></tr>
+      <tr><td>做饭要求加价（${esc(COOK_REQ||"不需要")}）</td><td>+${money(budget.cookSum)}</td></tr>
+      ${budget.extraDaySum? `<tr><td>超出基准服务天数加价（多 ${budget.extraDays} 天）</td><td>+${money(budget.extraDaySum)}</td></tr>`:""}
+      <tr class="s2"><td>预估月总费用</td><td>${money(budget.total)}</td></tr>
+      <tr class="st"><td>短期最终价格（总报价 +10%）</td><td>${money(budget.total*1.10)}</td></tr>
+      <tr class="st"><td>长期最终价格（总报价 +5%）</td><td>${money(budget.total*1.05)}</td></tr>
+    </table>
+    <div class="s-sec">推荐照护人员</div>
+    <div class="s-row">${ranked.slice(0,3).map((r,i)=>`<span>${i+1}. ${esc(r.w.name)}（${r.s.total.toFixed(0)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验</span>`).join("")}</div>
+    <div class="s-sec">服务内容要点（${tasks.length} 项）</div>
+    <ul class="s-tasks">${tasks.slice(0,14).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+    ${tasks.length>14? `<div class="s-row" style="font-size:11px;color:#8E949E">… 其余 ${tasks.length-14} 项详见完整任务清单</div>`:""}
+    <div class="s-note">※ 以上价格为按当前费率表推算的预估中值，最终以双方确认及面试结果为准；具体服务内容、作息安排与免责条款以正式合同为准。报价有效期 30 天。</div>
+    <div class="s-sign">
+      <div><div class="dn">机构（盖章）</div><div class="ln">${esc(ORG.name||"")}</div></div>
+      <div><div class="dn">客户（签字）</div><div class="ln">日期：${sheetDate()}</div></div>
+    </div>
+  </div>`;
+  $("sheetBody").innerHTML = html;
+  $("sheetTitle").textContent = "报价单";
+  $("sheetPng").style.display = "";
+  $("sheetTxt").style.display = "none";
+  $("sheetModal").hidden = false;
+}
+
+function buildWorkSheet(){
+  if(!LAST_RESULT){ toast("请先生成匹配结果","bad"); return; }
+  const { o, ranked, tasks } = LAST_RESULT;
+  const w = ranked[0] ? ranked[0].w : null;
+  const p = EVAL;
+  let html = `
+  <div class="sheet" id="workSheet">
+    <div class="s-org">
+      <div class="nm">${esc(ORG.name||"居家照护服务机构")}</div>
+      <div class="tt">照护工作安排单</div>
+      <div class="meta">日期 ${sheetDate()}${ORG.tel? " · 电话 "+esc(ORG.tel):""}</div>
+    </div>
+    <div class="s-sec">人员与客户</div>
+    <div class="s-row"><span>照护人员：<b>${w? esc(w.name):"—"}</b>${w? "（"+esc(w.gender||"")+" · "+w.age+"岁 · "+w.years+"年经验）":""}</span><span>证书：${w? esc((w.certs||[]).join(" / ")):"—"}</span></div>
+    <div class="s-row"><span>被照护人：${esc(p.name||"（未填）")}${p.gender? " · "+esc(p.gender):""}${p.age? " · "+esc(p.age)+"岁":""}</span><span>服务：${esc(o.svc)} · ${esc(o.level)}</span></div>
+    <div class="s-row"><span>服务时段：${esc(p.hours||"—")} 小时/天 · ${esc(p.days||"—")} 天/月 · 自 ${sheetDate()} 起</span></div>
+    <div class="s-sec">工作内容（${tasks.length} 项，逐项执行并记录）</div>
+    <ul class="s-tasks">${tasks.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+    <div class="s-sec">特别提醒</div>
+    <ul class="s-tasks">
+      <li>用药 / 胰岛素 / 监测等定时事项务必按时间点执行并记录，漏做及时上报</li>
+      <li>出现异常情况（跌倒、发热、异常情绪等）第一时间联系家属与机构</li>
+      <li>每日填写照护日志，交接班当面沟通</li>
+    </ul>
+    <div class="s-note">本单为工作安排与交接依据，若有疑问请于上岗前与机构确认。</div>
+    <div class="s-sign">
+      <div><div class="dn">照护人员（签字）</div><div class="ln">日期：${sheetDate()}</div></div>
+      <div><div class="dn">家属 / 客户（确认）</div><div class="ln">日期：${sheetDate()}</div></div>
+    </div>
+  </div>`;
+  $("sheetBody").innerHTML = html;
+  $("sheetTitle").textContent = "工作安排单";
+  $("sheetPng").style.display = "none";
+  $("sheetTxt").style.display = "";
+  $("sheetModal").hidden = false;
+}
+
+function closeSheet(){ const m=$("sheetModal"); if(m) m.hidden = true; }
+function printSheet(){
+  document.body.classList.add("printing-sheet");
+  window.print();
+  setTimeout(()=>document.body.classList.remove("printing-sheet"), 500);
+}
+function exportSheetPng(){
+  const node = $("sheetBody").firstElementChild;
+  if(!node){ toast("没有可导出的内容","bad"); return; }
+  const scale = 2;
+  const w = 820;
+  const h = Math.ceil(node.scrollHeight * scale) + 60;
+  const css = Array.from(document.querySelectorAll("style")).map(s=>s.textContent).join("");
+  const xml = new XMLSerializer().serializeToString(node);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><style>${css.replace(/</g,"&lt;")}</style><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${xml}</div></foreignObject></svg>`;
+  const url = URL.createObjectURL(new Blob([svg],{type:"image/svg+xml;charset=utf-8"}));
+  const img = new Image();
+  img.onload = ()=>{
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0,0,w,h);
+    ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    const a = document.createElement("a");
+    a.download = ($("sheetTitle").textContent||"单据")+"_"+(EVAL.name? EVAL.name+"_":"")+sheetDate()+".png";
+    a.href = c.toDataURL("image/png");
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("图片已导出","ok");
+  };
+  img.onerror = ()=>{ URL.revokeObjectURL(url); toast("图片导出失败，请改用「打印 / 存 PDF」","bad"); };
+  img.src = url;
+}
+function exportWorkTxt(){
+  if(!LAST_RESULT){ toast("请先生成匹配结果","bad"); return; }
+  const { o, ranked, tasks } = LAST_RESULT;
+  const w = ranked[0] ? ranked[0].w : null;
+  const p = EVAL;
+  const L = [];
+  L.push(ORG.name||"居家照护服务机构");
+  L.push("照护工作安排单 · " + sheetDate() + (ORG.tel? " · 电话 "+ORG.tel:""));
+  L.push("=".repeat(28));
+  L.push("照护人员：" + (w? w.name+"（"+w.gender+" · "+w.age+"岁 · "+w.years+"年经验）" : "—"));
+  if(w && (w.certs||[]).length) L.push("证书：" + w.certs.join(" / "));
+  L.push("被照护人：" + (p.name||"（未填）") + (p.gender? " · "+p.gender:"") + (p.age? " · "+p.age+"岁":""));
+  L.push("服务：" + o.svc + " · " + o.level + " · " + (p.hours||"—") + " 小时/天 · " + (p.days||"—") + " 天/月");
+  L.push("=".repeat(28));
+  L.push("工作内容（" + tasks.length + " 项）：");
+  tasks.forEach((t,i)=>L.push((i+1)+". " + t));
+  L.push("=".repeat(28));
+  L.push("特别提醒：定时用药 / 监测按时间点执行并记录；异常第一时间上报；每日填写照护日志。");
+  const blob = new Blob([L.join("\n")],{type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.download = "工作安排_"+(p.name? p.name+"_":"")+sheetDate()+".txt";
+  a.href = URL.createObjectURL(blob);
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1200);
+  toast("工作内容已导出为文本","ok");
+}
+
+/* ---------- 7. 引擎：等级判定 / 需求推导 ---------- */
+function adlScore(){
+  const w = { "独立":10,"能控制":10,"需协助":7,"偶尔失禁":7,"依赖":2,"失禁":2,"流食":4 };
+  let s=0, filled=0;
+  ADL_ITEMS.forEach(it=>{ const v=ADL[it.k]; if(v){ filled++; s += (w[v]||0); } });
+  return { score:s, max:ADL_ITEMS.length*10, filled, total:ADL_ITEMS.length };
+}
+function autoLevel(scoreObj){
+  const s=scoreObj.score;
+  if(scoreObj.filled===0) return "轻度依赖";
+  if(s<=40) return "重度依赖";
+  if(s<=70) return "中度依赖";
+  return "轻度依赖";
+}
+function finalLevel(){
+  if(SELF) return SELF;
+  let lv = autoLevel(adlScore());
+  if(RISK.fall==="高" && lv==="轻度依赖") lv="中度依赖";
+  if(EVAL.cog==="中度障碍"||EVAL.cog==="重度障碍"){ if(lv==="轻度依赖") lv="中度依赖"; }
+  if(EVAL.cog==="重度障碍") lv="重度依赖";
+  return lv;
+}
+function derivedSkills(){
+  const set = new Set();
+  if(["需协助","依赖"].includes(ADL.bath)||["需协助","依赖"].includes(ADL.groom)) set.add("助浴");
+  if(["需协助","依赖"].includes(ADL.eat)) set.add("喂食协助");
+  if(["需协助","依赖"].includes(ADL.dress)||["需协助","依赖"].includes(ADL.eat)) set.add("生活照护");
+  if(["偶尔失禁","失禁"].includes(ADL.stool)||["偶尔失禁","失禁"].includes(ADL.urine)||["需协助","依赖"].includes(ADL.toilet)) set.add("如厕护理");
+  if(["需协助","依赖"].includes(ADL.transfer)) { set.add("翻身拍背"); set.add("转移辅助"); }
+  if(["需协助","依赖"].includes(ADL.walk)||["需协助","依赖"].includes(ADL.stair)) set.add("转移辅助");
+  NEEDS.forEach(n=>{ if(NEEDSET[n]) set.add(n); });
+  return Array.from(set);
+}
+function derivedCertReq(){
+  const med = NEEDS.filter(n=>NEEDSET[n]);
+  const strong = ["注射/胰岛素","伤口换药护理","导尿管护理","鼻饲/胃管护理","吸氧护理"].filter(n=>NEEDSET[n]);
+  if(strong.length) return { need:true, accept:["护士执业证","护士资格证"], label:"护士执业/资格证" };
+  if(med.length)     return { need:true, accept:["护士执业证","护士资格证","养老护理员一级","养老护理员二级"], label:"护理员二级及以上/护士证" };
+  return { need:false, accept:[], label:"" };
+}
+
+/* ---------- 8. 引擎：匹配评分 ---------- */
+function scoreWorker(w, ctx){
+  const needSkills = ctx.skills;
+  const skillHit = needSkills.filter(s=>(w.skills||[]).includes(s)).length;
+  const skill = needSkills.length? skillHit/needSkills.length*100 : 100;
+
+  const lvAll = SELFCARE;
+  const wantIdx = lvAll.indexOf(ctx.level);
+  let level=0;
+  if((w.levels||[]).includes(ctx.level)) level=100;
+  else {
+    let best=0;
+    (w.levels||[]).forEach(l=>{ const d=Math.abs(lvAll.indexOf(l)-wantIdx); best=Math.max(best, d===1?55:10); });
+    level=best||10;
+  }
+  let cert=100;
+  if(ctx.certReq.need){
+    cert = (w.certs||[]).some(c=>ctx.certReq.accept.includes(c))? 100 : 35;
+  }
+  const medNeed = NEEDS.filter(n=>NEEDSET[n]);
+  let medical=100;
+  if(medNeed.length){
+    const hit=medNeed.filter(n=>(w.skills||[]).includes(n)).length;
+    medical = hit/medNeed.length*100;
+  }
+  const needYears = { "完全自理":1, "轻度依赖":3, "中度依赖":5, "重度依赖":8 }[ctx.level]||3;
+  const exp = Math.min(100, (w.years||0)/needYears*100);
+  let gender=100;
+  if(ctx.genderReq){ gender = (w.gender===ctx.genderReq)? 100 : 0; }
+  let cook=100;
+  const cookSkills=["膳食","做饭","烹饪","营养餐","特殊饮食","糖尿病餐","家常菜"];
+  const hasCook=(w.skills||[]).some(s=>cookSkills.includes(s));
+  if(ctx.cookReq && ctx.cookReq!=="不需要"){ cook = hasCook? 100 : 40; }
+  const dims = { level, skill, cert, medical, exp, gender, cook };
+  const sumW = Object.values(WEIGHTS).reduce((a,b)=>a+(+b||0),0)||1;
+  let total=0;
+  Object.keys(dims).forEach(k=>{ total += (WEIGHTS[k]||0)/sumW * dims[k]; });
+  return { dims, total, skillHit, medNeed, certReq:ctx.certReq };
+}
+
+/* ---------- 9. 引擎：价格 ---------- */
+function computeBudget(level, svc, night, riskObj, cookReq, days, hours){
+  const R=RULES;
+  let base, formula;
+  const d = days|| (svc==="住家(24小时)"?30: svc==="白班(8-12小时)"?26: 5);
+  const h = hours|| (svc==="住家(24小时)"?24: svc==="白班(8-12小时)"?10: 4);
+  const md = R.monthDays||30;
+  if(svc==="钟点(半天及以下)"){ base = R.base.hour * h * d * (md/7); formula=`${R.base.hour}元/时 × ${h}时 × ${d}天/周 × ${(md/7).toFixed(2)}周`; }
+  else if(svc==="临时/按需"){ base = R.base.temp * d * (md/7); formula=`${R.base.temp}元/天 × ${d}天/周 × ${(md/7).toFixed(2)}周`; }
+  else if(svc==="白班(8-12小时)"){ base = R.base.day; formula=`白班基准月费 ${R.base.day} 元`; }
+  else { base = R.base.home; formula=`住家基准月费 ${R.base.home} 元`; }
+
+  const rBase = R.baseServiceDays!=null? R.baseServiceDays : 26;
+  const rFee  = R.extraDayFee!=null? R.extraDayFee : 150;
+  let extraDays = 0, extraDaySum = 0;
+  if(svc==="住家(24小时)" || svc==="白班(8-12小时)"){
+    extraDays = Math.max(0, Math.round((Number(days)||0) - rBase));
+    extraDaySum = extraDays * rFee;
+  }
+
+  const lf = R.levelFactor[level]!=null? R.levelFactor[level] : 1.2;
+  const medItems = NEEDS.filter(n=>NEEDSET[n]);
+  const medSum = medItems.reduce((a,n)=>a+(R.medical[n]||0),0);
+  const nightSum = R.night[night||"无"]||0;
+  const riskSum = (R.risk[riskObj.fall||"无"]||0) + (R.risk[riskObj.wander||"无"]||0) + (R.risk[riskObj.pressure||"无"]||0);
+  const cookSum = R.cook[cookReq||"不需要"]||0;
+  const sub = base*lf + medSum + nightSum + riskSum + cookSum + extraDaySum;
+  const total = sub;
+  const agency = total * (R.agency||0);
+  return { base, formula, lf, medItems, medSum, nightSum, riskSum, cookSum, extraDays, extraDaySum, sub, total, agency };
+}
+
+/* ---------- 10. 引擎：任务清单 ---------- */
+function buildTasks(level, riskObj){
+  const t=[]; const add=s=>{ if(!t.includes(s)) t.push(s); };
+  if(["需协助","依赖"].includes(ADL.eat)) add("协助进食（备餐、喂食、观察吞咽）");
+  if(ADL.eat==="流食") add("流食/半流食照护（食物加工成糊状或流质，少量慢喂，观察吞咽与呛咳）");
+  if(["需协助","依赖"].includes(ADL.bath)) add("协助洗澡 / 擦浴（每月 2 次）");
+  if(["需协助","依赖"].includes(ADL.groom)) add("协助修饰（洗脸、刷牙、梳头）");
+  if(["需协助","依赖"].includes(ADL.dress)) add("协助穿衣、更换衣物");
+  if(["偶尔失禁","失禁"].includes(ADL.stool)||["偶尔失禁","失禁"].includes(ADL.urine)) add("失禁护理（更换尿垫、皮肤清洁、定时提醒）");
+  if(["需协助","依赖"].includes(ADL.toilet)) add("协助如厕及便后清洁");
+  if(["需协助","依赖"].includes(ADL.transfer)) add("辅助床椅转移 / 定时翻身拍背");
+  if(["需协助","依赖"].includes(ADL.walk)) add("协助平地行走 / 使用助行器或轮椅");
+  if(["需协助","依赖"].includes(ADL.stair)) add("上下楼梯安全防护（非必要避免）");
+  NEEDS.forEach(n=>{ if(NEEDSET[n]) add(n+"（按护理规范执行并记录）"); });
+  if(EVAL){
+    const num = v => Number(v)||0;
+    if(num(EVAL.insulin)>0) add(`打胰岛素：每日 ${num(EVAL.insulin)} 次${EVAL.insulinTime? "（"+EVAL.insulinTime+"）":""}，按医嘱剂量注射、轮换部位并记录`);
+    if(num(EVAL.oral)>0) add(`喂药 / 口服药：每日 ${num(EVAL.oral)} 次${EVAL.oralTime? "（"+EVAL.oralTime+"）":""}，核对药名剂量、协助服药并观察反应`);
+    if(num(EVAL.monitor)>0) add(`生命体征监测：每日 ${num(EVAL.monitor)} 次（血压/血糖等），记录数值与异常`);
+    if(EVAL.otherCare) add(`其他定时护理：${EVAL.otherCare}`);
+    if(EVAL.cannot) add(`照护禁忌（因病情／身体情况不能做）：${EVAL.cannot}`);
+  }
+  if(COOK_REQ && COOK_REQ!=="不需要"){
+    const whats = (EVAL && EVAL.cookWhat) ? "，口味/菜式："+EVAL.cookWhat : "";
+    const cookTask = COOK_REQ==="一顿饭" ? "负责做一顿饭（含食材采购、餐后清洁）"+whats
+      : COOK_REQ==="两顿饭" ? "负责做两顿饭（含食材采购、餐后清洁）"+whats
+      : "承担做饭服务"+whats;
+    add(cookTask);
+  }
+  if(riskObj.fall==="高") add("防跌倒管理（床边护栏、离床报警、地面防滑、夜间照明）");
+  if(riskObj.wander==="高") add("防走失管理（定位设备、门窗安全、定时巡查）");
+  if(riskObj.pressure==="高") add("防压疮管理（每 2 小时翻身、皮肤评估、减压垫）");
+  if(level==="重度依赖") add("24 小时持续照护与安全监护");
+  if(level==="中度依赖") add("日间全程照护与活动协助");
+  add("每日记录照护日志、交接班与异常上报");
+  return t;
+}
+
+/* ---------- 11. 主流程：生成结果 ---------- */
+function collectEval(){
+  EVAL = {
+    name:$("f_name").value.trim(), gender:$("f_gender").value, age:$("f_age").value, weight:$("f_weight").value,
+    live:$("f_live").value.trim(), genderReq:(GENDER_REQ==="不限"? "":GENDER_REQ), ageReq:$("f_ageReq").value.trim(), cookReq:COOK_REQ, cookWhat:$("f_cookWhat").value.trim(), cannot:$("f_cannot").value.trim(),
+    diag:$("f_diag").value.trim(), chronic:$("f_chronic").value.trim(), surgery:$("f_surgery").value.trim(),
+    med:$("f_med").value.trim(), consc:$("f_consc").value, cog:$("f_cog").value, sense:$("f_sense").value.trim(),
+    insulin:$("f_insulin").value.trim(), insulinTime:$("f_insulin_time").value.trim(),
+    oral:$("f_oral").value.trim(), oralTime:$("f_oral_time").value.trim(),
+    monitor:$("f_monitor").value.trim(), otherCare:$("f_othercare").value.trim(),
+    days:$("f_days").value, hours:$("f_hours").value, start:$("f_start").value
+  };
+}
+function collectEvalSafe(){ try{ collectEval(); return EVAL; }catch(e){ return {}; } }
+function runMatch(opt){
+  opt = opt || {};
+  collectEval();
+  const svc = SVC || "";
+  if(!svc){ showFloatResult(false); $("matchState").textContent = "请先选择「期望服务类型」，选择后结果实时更新"; return false; }
+  const sc = adlScore();
+  const level = finalLevel();
+  const skills = derivedSkills();
+  const certReq = derivedCertReq();
+  const budget0 = computeBudget(level, svc, NIGHT||"无", RISK, COOK_REQ||"不需要", Number(EVAL.days)||0, Number(EVAL.hours)||0);
+
+  const ctx = { level, skills, certReq, budget: budget0.total, genderReq: EVAL.genderReq||"", cookReq: COOK_REQ||"不需要" };
+  const ranked = ROSTER.map(w=>({ w, s:scoreWorker(w, ctx) }))
+                        .sort((a,b)=> b.s.total - a.s.total);
+
+  const budget = budget0; // 已用最终等级算
+  const tasks = buildTasks(level, RISK);
+  renderResult({ level, sc, ranked, budget, tasks, svc, certReq, skills }, opt.scroll);
+  $("matchState").textContent = `已生成 · ADL ${sc.filled}/${sc.total} 项已填 · 等级「${level}」`;
+  showFloatResult(true);
+  return true;
+}
+/* 实时更新：表单变化后防抖自动重算（不打扰滚动） */
+let autoTimer = null;
+function scheduleAutoRun(){
+  if(!SVC){
+    const st=$("matchState");
+    if(st) st.textContent = "请在第 5 步选择「期望服务类型」，选择后结果实时更新";
+    return;
+  }
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(()=>{
+    if(runMatch({scroll:false})){
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,"0"), mm = String(now.getMinutes()).padStart(2,"0");
+      const st=$("matchState");
+      if(st) st.textContent = "已自动更新 · "+hh+":"+mm;
+    }
+  }, 450);
+}
+
+/* ---------- 12. 渲染结果（v2：评分环 / 费用拆解条 / 最终价格卡） ---------- */
+const money = n => "¥" + Math.round(n).toLocaleString("zh-CN");
+const DIM_COLOR = { level:"#B4542E", skill:"#2F6290", cert:"#7A5AA6", medical:"#2E7D4F", exp:"#96690B", gender:"#B03A6A", cook:"#0E8A7D" };
+let LAST_RESULT = null;
+
+function ringSVG(score){
+  const r=22, c=2*Math.PI*r, pct=Math.max(0,Math.min(100,score));
+  const col = score>=75 ? "#2E7D4F" : score>=55 ? "#B4542E" : "#B23B3B";
+  return `<div class="ring">
+    <svg viewBox="0 0 56 56" width="54" height="54">
+      <circle cx="28" cy="28" r="${r}" fill="none" stroke="#EDE9E2" stroke-width="5"/>
+      <circle cx="28" cy="28" r="${r}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"
+        stroke-dasharray="${c}" stroke-dashoffset="${(c*(1-pct/100)).toFixed(2)}" transform="rotate(-90 28 28)"/>
+    </svg>
+    <div class="rv"><b style="color:${col}">${score.toFixed(1)}</b><span>分</span></div>
+  </div>`;
+}
+function priceBar(b){
+  const items=[];
+  const baseAdj = b.base*b.lf;
+  if(baseAdj>0) items.push({l:"基础费(等级后)", v:baseAdj, c:"var(--brand)"});
+  if(b.medSum>0) items.push({l:"专项护理", v:b.medSum, c:"var(--ok)"});
+  if(b.nightSum>0) items.push({l:"夜间护理", v:b.nightSum, c:"var(--info)"});
+  if(b.riskSum>0) items.push({l:"风险管控", v:b.riskSum, c:"var(--warn)"});
+  if(b.cookSum>0) items.push({l:"做饭", v:b.cookSum, c:"var(--purple)"});
+  if(b.extraDaySum>0) items.push({l:"超天数加价", v:b.extraDaySum, c:"var(--pink)"});
+  const tot = items.reduce((s,x)=>s+x.v,0);
+  if(tot<=0) return "";
+  const segs = items.map(x=>`<i style="width:${(x.v/tot*100).toFixed(2)}%;background:${x.c}" title="${x.l} ${money(x.v)}"></i>`).join("");
+  const leg = items.map(x=>`<span><i style="background:${x.c}"></i>${x.l} ${money(x.v)}</span>`).join("");
+  return `<div class="pbar big">${segs}</div><div class="legend">${leg}</div>`;
+}
+
+function renderResult(o, scroll){
+  const { level, sc, ranked, budget, tasks, svc, certReq, skills } = o;
+  const best = ranked[0];
+  const sumW = Object.values(WEIGHTS).reduce((a,b)=>a+(+b||0),0)||1;
+  const today = (EVAL && EVAL.start) ? EVAL.start : new Date().toISOString().slice(0,10);
+
+  const bestBadge = best && best.s.total>=75? `<span class="badge ok">高度匹配</span>`
+    : best && best.s.total>=55? `<span class="badge warn">较匹配</span>` : `<span class="badge bad">匹配偏低</span>`;
+
+  let html = "";
+  html += `<div class="res-head">
+    <div class="rt">评估结论<span class="rd">评估日期 ${today}</span></div>
+    <div class="lv"><b>${esc(level)}</b>${bestBadge}<span class="svc">服务类型：${esc(svc)}</span></div>
+    <div class="adlbar">ADL 参考评分 ${sc.score}/${sc.max} · 已填 ${sc.filled}/${sc.total} 项
+      <div class="mini-track"><i style="width:${(sc.score/sc.max*100).toFixed(1)}%"></i></div>
+    </div>
+    <div class="hint" style="margin-top:8px">
+      ${skills.length?`推导所需技能：${esc(skills.join("、"))}<br/>`:""}
+      ${certReq.need?`资质要求：${esc(certReq.label)}`:""}
+    </div>
+  </div>`;
+
+  /* ---- 人 ---- */
+  html += `<div class="sec"><h3><span class="bar"></span>匹配照护人员（Top ${Math.min(3,ranked.length)}）</h3>`;
+  ranked.slice(0,3).forEach((r,idx)=>{
+    const s=r.s; const w=r.w;
+    const skillMiss = skills.filter(x=>!(w.skills||[]).includes(x));
+    const bar = Object.keys(s.dims).map(k=>{
+      const pct = (WEIGHTS[k]||0)/sumW * s.dims[k];
+      return `<i style="width:${pct.toFixed(2)}%;background:${DIM_COLOR[k]}" title="${WDIM[k].t} 得分 ${s.dims[k].toFixed(0)}"></i>`;
+    }).join("");
+    const legend = Object.keys(s.dims).map(k=>`<span><i style="background:${DIM_COLOR[k]}"></i>${WDIM[k].t} ${s.dims[k].toFixed(0)}</span>`).join("");
+    html += `<div class="person ${idx===0?"best":""}">
+      <div class="ph">
+        <div class="av">${esc((w.name||"?").slice(0,1))}</div>
+        <div class="pinfo">
+          <div class="pn">${esc(w.name)} ${idx===0?'<span class="badge ok" style="height:18px;font-size:10px">推荐</span>':""}</div>
+          <div class="pm">${esc(w.gender||"")} · ${w.age||"—"}岁 · ${w.years||0}年经验</div>
+          <div class="pm">${esc((w.certs||[]).join(" / ")||"暂无证书信息")}</div>
+        </div>
+        ${ringSVG(s.total)}
+      </div>
+      <div class="pbar">${bar}</div>
+      <div class="legend">${legend}</div>
+      ${skillMiss.length?`<div class="miss">技能缺口：${esc(skillMiss.join("、"))}</div>`:(skills.length?`<div class="hit">所需生活/护理技能全部覆盖</div>`:"")}
+      ${w.note?`<div class="hint" style="margin-top:5px">擅长：${esc(w.note)}</div>`:""}
+    </div>`;
+  });
+  html += `</div>`;
+
+  /* ---- 价格 ---- */
+  html += `<div class="sec"><h3><span class="bar"></span>费用归总（预估月费）</h3>
+    ${priceBar(budget)}
+    <table class="price">
+      <tr class="rule"><td>基础月费（${esc(svc)}）</td><td>${money(budget.base)}</td></tr>
+      <tr class="rule"><td>× 护理等级系数（${esc(level)}）</td><td>× ${budget.lf}</td></tr>
+      <tr><td>等级调整后基础费</td><td>${money(budget.base*budget.lf)}</td></tr>`;
+  if(budget.medItems.length){
+    budget.medItems.forEach(n=>{ html += `<tr><td>专项护理 · ${esc(n)}</td><td>+${money(RULES.medical[n]||0)}</td></tr>`; });
+  } else {
+    html += `<tr class="rule"><td>专项护理加价</td><td>+¥0</td></tr>`;
+  }
+  html += `<tr><td>夜间护理加价（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>`;
+  html += `<tr><td>风险管控加价（跌倒${RISK.fall||"无"}/走失${RISK.wander||"无"}/压疮${RISK.pressure||"无"}）</td><td>+${money(budget.riskSum)}</td></tr>`;
+  html += `<tr><td>做饭要求加价（${esc(COOK_REQ||"不需要")}）</td><td>+${money(budget.cookSum)}</td></tr>`;
+  if(budget.extraDaySum) html += `<tr><td>超出基准服务天数加价（多 ${budget.extraDays} 天 × ¥${RULES.extraDayFee}）</td><td>+${money(budget.extraDaySum)}</td></tr>`;
+  html += `<tr><td>小计</td><td>${money(budget.sub)}</td></tr>`;
+  html += `<tr class="sum"><td>预估月总费用</td><td>${money(budget.total)}</td></tr>`;
+  html += `</table>
+    <div class="finalrow">
+      <div class="final short"><span>短期最终价格（总报价 +10%）</span><b>${money(budget.total*1.10)}</b></div>
+      <div class="final long"><span>长期最终价格（总报价 +5%）</span><b>${money(budget.total*1.05)}</b></div>
+    </div>
+    <div class="formula">计算过程：${esc(budget.formula)}
+月费 = 基础月费 × 等级系数 + 专项护理 ${money(budget.medSum)} + 夜间 ${money(budget.nightSum)} + 风险 ${money(budget.riskSum)} + 做饭加价 ${money(budget.cookSum)}
+     = ${money(budget.base)} × ${budget.lf} + ${money(budget.medSum)} + ${money(budget.nightSum)} + ${money(budget.riskSum)} + ${money(budget.cookSum)}
+     ≈ ${money(budget.total)} /月</div>
+    <div class="hint" style="margin-top:8px">※ 价格为按当前费率表推算的<b>预估区间中值</b>，实际以机构报价与面试为准。费率可在「③ 费率与规则」中改为你当地真实标准。<br/>※「短期」「长期」为在<b>预估月总费用</b>基础上的两种最终报价：<b>短期 = 总报价 × 110%（+10%）</b>，<b>长期 = 总报价 × 105%（+5%）</b>。</div>
+  </div>`;
+
+  /* ---- 任务 ---- */
+  html += `<div class="sec"><h3><span class="bar"></span>需要做的事情（照护任务清单）</h3>
+    <ul class="tasks">${tasks.map(t=>`<li><label><input type="checkbox"><span>${esc(t)}</span></label></li>`).join("")}</ul>
+  </div>`;
+
+  $("resultBox").innerHTML = html;
+  const rc = $("resultcol"); if(rc) rc.classList.add("has-result");
+  $("resultBox").querySelectorAll("ul.tasks input").forEach(cb=>{
+    cb.addEventListener("change", ()=>cb.closest("li").classList.toggle("done", cb.checked));
+  });
+  LAST_RESULT = { o, ranked, budget, tasks };
+  if(scroll) $("resultBox").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* ---------- 13. 复制摘要 ---------- */
+function copySummary(){
+  if(!LAST_RESULT){ toast("请先生成匹配结果","bad"); return; }
+  const { ranked, budget, tasks } = LAST_RESULT;
+  const lines = [];
+  lines.push("【居家照护评估 · 智能匹配与报价】");
+  lines.push("评估日期：" + ((EVAL&&EVAL.start)||new Date().toISOString().slice(0,10)));
+  lines.push(`被照护人：${EVAL.name||"（未填）"}${EVAL.gender?(" · "+EVAL.gender):""}${EVAL.age?(" · "+EVAL.age+"岁"):""}`);
+  lines.push(`护理等级：${LAST_RESULT.o.level}　服务类型：${LAST_RESULT.o.svc}`);
+  lines.push("推荐照护人员：");
+  ranked.slice(0,3).forEach((r,i)=>{ lines.push(`${i+1}. ${r.w.name}（${r.s.total.toFixed(1)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验`); });
+  lines.push(`预估月费：${money(budget.total)}　短期 ${money(budget.total*1.10)}（+10%）　长期 ${money(budget.total*1.05)}（+5%）`);
+  lines.push("照护任务清单：");
+  tasks.forEach(t=>lines.push("· "+t));
+  const txt = lines.join("\n");
+  const done = ()=>{ toast("摘要已复制，可粘贴发给客户","ok"); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt, done));
+  } else fallbackCopy(txt, done);
+}
+function fallbackCopy(txt, done){
+  const ta=document.createElement("textarea");
+  ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ toast("复制失败，请手动选择文本","bad"); }
+  ta.remove();
+}
+
+/* ---------- 13.5 评估记录：保存 / 列表 / 详情 / 清空 ---------- */
+const RECKEY = "care-records-v1";
+let recDetailOpen = null;
+function loadRecords(){
+  try{ const s=localStorage.getItem(RECKEY); if(s) return JSON.parse(s); }catch(e){}
+  return [];
+}
+function saveRecords(list){
+  try{ localStorage.setItem(RECKEY, JSON.stringify(list)); }catch(e){}
+}
+function fmtNow(){
+  const d=new Date(); const p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+function saveRecord(){
+  if(!LAST_RESULT){ toast("请先生成匹配结果，再保存","bad"); return; }
+  const { o, ranked, budget, tasks } = LAST_RESULT;
+  const medCost = (budget.medItems||[]).map(n=>({ n, v: RULES.medical[n]||0 }));
+  const rec = {
+    id: Date.now(),
+    time: fmtNow(),
+    name: (EVAL&&EVAL.name)||"（未填姓名）",
+    gender: (EVAL&&EVAL.gender)||"", age: (EVAL&&EVAL.age)||"",
+    level: o.level, svc: o.svc,
+    scScore: o.sc.score, scMax: o.sc.max, filled: o.sc.filled, total: o.sc.total,
+    budget: JSON.parse(JSON.stringify(budget)), medCost,
+    tasks: tasks.slice(),
+    skills: (o.skills||[]).slice(),
+    certReq: o.certReq ? {need:o.certReq.need, label:o.certReq.label} : null,
+    ranked: ranked.slice(0,3).map(r=>({
+      name: r.w.name||"", gender: r.w.gender||"", age: r.w.age||"", years: r.w.years||0,
+      certs: (r.w.certs||[]).slice(), note: r.w.note||"",
+      total: Math.round(r.s.total*10)/10
+    }))
+  };
+  const list = loadRecords(); list.unshift(rec);
+  saveRecords(list);
+  renderRecords();
+  toast("已保存到评估记录","ok");
+  openAsk();
+}
+function renderRecords(){
+  const badge=$("recBadge");
+  const list=loadRecords();
+  if(badge){ badge.hidden = list.length===0; badge.textContent = list.length>99? "99+":String(list.length); }
+  const box=$("recordsBox"); if(!box) return;
+  recDetailOpen = null;
+  if(list.length===0){
+    box.innerHTML = '<div class="rec-empty"><div class="rec-empty-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div><p>还没有保存的评估记录</p><p class="hint">完成一次评估后，点结果区的「保存本次评估」，报价、任务清单与护工匹配就会分别存到这里，可随时查看。</p></div>';
+    return;
+  }
+  box.innerHTML = list.map((r,idx)=>`
+    <div class="rec-card">
+      <div class="rec-top">
+        <div class="rec-tt">${esc(r.name)}${r.gender?(" · "+esc(r.gender)):""}${r.age?(" · "+esc(r.age)+"岁"):""}</div>
+        <div class="rec-time">${esc(r.time)}</div>
+      </div>
+      <div class="rec-meta"><span class="pill">${esc(r.level)}</span><span class="pill">${esc(r.svc)}</span></div>
+      <div class="rec-rows">
+        <div class="rec-row"><i>报价</i><b>${money(r.budget.total)}</b><span class="mini">短期 ${money(r.budget.total*1.10)} · 长期 ${money(r.budget.total*1.05)}</span></div>
+        <div class="rec-row"><i>任务</i><b>${r.tasks.length} 项</b><span class="mini">照护任务清单</span></div>
+        <div class="rec-row"><i>护工</i><b>${r.ranked.length} 人</b><span class="mini">${r.ranked.map(x=>esc(x.name)).join("、")}</span></div>
+      </div>
+      <div class="rec-btns">
+        <button class="btn sm" data-rec-act="view">查看详情</button>
+        <button class="btn ghost sm danger" data-rec-act="del">删除</button>
+      </div>
+    </div>`).join("");
+  box.querySelectorAll("[data-rec-act=view]").forEach((b,i)=>b.addEventListener("click",()=>{ renderRecordDetail(list[i]); }));
+  box.querySelectorAll("[data-rec-act=del]").forEach((b,i)=>{
+    b.addEventListener("click",()=>{
+      if(b.dataset.armed){
+        const l2=loadRecords().filter(x=>x.id!==list[i].id);
+        saveRecords(l2); toast("已删除该记录","ok"); renderRecords();
+      } else {
+        b.dataset.armed="1"; b.textContent="确认删除？";
+        setTimeout(()=>{ if(b.dataset.armed){ delete b.dataset.armed; b.textContent="删除"; } },2500);
+      }
+    });
+  });
+}
+function renderRecordDetail(r){
+  recDetailOpen = r.id;
+  const box=$("recordsBox"); if(!box) return;
+  const b = r.budget;
+  let priceRows = `
+    <tr><td>基础月费（${esc(r.svc)}）</td><td>${money(b.base)}</td></tr>
+    <tr><td>× 护理等级系数（${esc(r.level)}）</td><td>× ${b.lf}</td></tr>
+    <tr><td>等级调整后基础费</td><td>${money(b.base*b.lf)}</td></tr>`;
+  if(r.medCost && r.medCost.length){
+    r.medCost.forEach(m=>{ priceRows += `<tr><td>专项护理 · ${esc(m.n)}</td><td>+${money(m.v)}</td></tr>`; });
+  } else if(b.medItems && b.medItems.length){
+    b.medItems.forEach(n=>{ priceRows += `<tr><td>专项护理 · ${esc(n)}</td><td>+${money(RULES.medical[n]||0)}</td></tr>`; });
+  } else {
+    priceRows += `<tr><td>专项护理加价</td><td>+¥0</td></tr>`;
+  }
+  priceRows += `
+    <tr><td>夜间护理加价</td><td>+${money(b.nightSum)}</td></tr>
+    <tr><td>风险管控加价</td><td>+${money(b.riskSum)}</td></tr>
+    <tr><td>做饭要求加价</td><td>+${money(b.cookSum)}</td></tr>`;
+  if(b.extraDaySum) priceRows += `<tr><td>超出基准天数加价（多 ${b.extraDays} 天 × ¥${RULES.extraDayFee}）</td><td>+${money(b.extraDaySum)}</td></tr>`;
+  priceRows += `
+    <tr><td>小计</td><td>${money(b.sub)}</td></tr>
+    <tr class="sum"><td>预估月总费用</td><td>${money(b.total)}</td></tr>`;
+  const workers = r.ranked.map((w,i)=>`
+    <div class="rec-w">
+      <div class="rec-wtop">
+        <div class="av">${esc((w.name||"?").slice(0,1))}</div>
+        <div class="rec-winfo">
+          <div class="rec-wname">${esc(w.name)}${i===0?'<span class="badge ok" style="height:18px;font-size:10px">推荐</span>':""}</div>
+          <div class="rec-wmeta">${esc(w.gender)} · ${esc(w.age)}岁 · ${w.years}年经验</div>
+        </div>
+        <b class="rec-wscore">${w.total}分</b>
+      </div>
+      <div class="rec-wmeta2">${esc((w.certs||[]).join(" / ")||"暂无证书信息")}</div>
+      ${w.note?`<div class="hint" style="margin-top:4px">擅长：${esc(w.note)}</div>`:""}
+    </div>`).join("");
+  box.innerHTML = `
+    <div class="rec-detail">
+      <div class="rec-dhead">
+        <button class="btn sm" id="recBack">← 返回列表</button>
+        <div class="rec-dtt">${esc(r.name)} · ${esc(r.level)}</div>
+        <div class="rec-time">${esc(r.time)}</div>
+      </div>
+      <div class="rec-sec"><h3>① 报价</h3>
+        <table class="price">${priceRows}</table>
+        <div class="finalrow">
+          <div class="final short"><span>短期最终价格（总报价 +10%）</span><b>${money(b.total*1.10)}</b></div>
+          <div class="final long"><span>长期最终价格（总报价 +5%）</span><b>${money(b.total*1.05)}</b></div>
+        </div>
+      </div>
+      <div class="rec-sec"><h3>② 要做到的事（照护任务清单）</h3>
+        <ul class="tasks">${r.tasks.map(t=>`<li><label><input type="checkbox"><span>${esc(t)}</span></label></li>`).join("")}</ul>
+      </div>
+      <div class="rec-sec"><h3>③ 护工任务（匹配照护人员 Top ${Math.min(3,r.ranked.length)}）</h3>${workers}</div>
+    </div>`;
+  $("recBack").addEventListener("click", renderRecords);
+  box.querySelectorAll("ul.tasks input").forEach(cb=>{
+    cb.addEventListener("change", ()=>cb.closest("li").classList.toggle("done", cb.checked));
+  });
+}
+function clearForm(){
+  ["f_name","f_gender","f_age","f_weight","f_live","f_diag","f_chronic","f_surgery","f_med",
+   "f_insulin","f_insulin_time","f_oral","f_oral_time","f_monitor","f_othercare","f_consc","f_cog","f_sense",
+   "f_days","f_hours","f_start","f_ageReq","f_cookWhat","f_cannot"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
+  document.querySelectorAll("#pane-assess .chip").forEach(c=>{ c.classList.remove("on"); c.setAttribute("aria-pressed","false"); });
+  document.querySelectorAll("#pane-assess .needchk").forEach(l=>{ const cb=l.querySelector("input"); if(cb) cb.checked=false; l.classList.remove("on"); });
+  ADL={}; NEEDSET={}; RISK={fall:"",wander:"",pressure:""}; SELF=""; NIGHT=""; SVC=""; GENDER_REQ=""; COOK_REQ=""; EVAL={}; LAST_RESULT=null;
+  try{ localStorage.removeItem(LSFORM); }catch(e){}
+  const rb=$("resultBox");
+  if(rb) rb.innerHTML = '<div class="empty"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div><p>填好左侧评估信息，生成匹配人员、费用与任务清单</p><div class="steps3"><div><i>1</i><span>第 5 步选择「期望服务类型」</span></div><div><i>2</i><span>结果在右侧实时更新，无需反复点击</span></div><div><i>3</i><span>可复制摘要发给客户，或打印成报告</span></div></div></div>';
+  const rc=$("resultcol"); if(rc) rc.classList.remove("has-result");
+  const st=$("matchState"); if(st) st.textContent="";
+  showFloatResult(false);
+  showStep(1);
+  toast("表单已清空，可评估下一位","ok");
+}
+function openAsk(){ const m=$("askModal"); if(m) m.hidden=false; }
+function closeAsk(){ const m=$("askModal"); if(m) m.hidden=true; }
+
+/* ---------- 14. 导入 / 导出 / 重置 ---------- */
+function exportCfg(){
+  const data = { app:"care-match", version:2, exportedAt:new Date().toISOString(), ROSTER, RULES, WEIGHTS, EVAL:collectEvalSafe() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "照护匹配配置_" + new Date().toISOString().slice(0,10) + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast("配置已导出","ok");
+}
+function importCfg(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);
+      if(o.ROSTER) ROSTER=o.ROSTER;
+      if(o.RULES)  RULES=Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES)),o.RULES);
+      if(o.WEIGHTS)WEIGHTS=Object.assign(JSON.parse(JSON.stringify(DEFAULT_WEIGHTS)),o.WEIGHTS);
+      applyFrozen(); syncRules();
+      save(); renderRoster(); renderRules(); renderWeights();
+      toast("配置导入成功。","ok");
+    }catch(e){ toast("导入失败：不是有效的 JSON 配置。","bad"); }
+  };
+  r.readAsText(file);
+}
+function resetAll(){
+  if(!confirm("确定恢复默认数据吗？当前的护工名册、费率、权重修改将被覆盖。")) return;
+  ROSTER=JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+  RULES=JSON.parse(JSON.stringify(DEFAULT_RULES));
+  WEIGHTS=JSON.parse(JSON.stringify(DEFAULT_WEIGHTS));
+  applyFrozen(); syncRules();
+  save(); renderRoster(); renderRules(); renderWeights();
+  toast("已恢复默认数据。","ok");
+}
+function makeLockedCopy(){
+  if(!guardAdmin()) return;
+  const payload = { rules: JSON.parse(JSON.stringify(RULES)), frozenAt: new Date().toISOString() };
+  let html = PRISTINE_HTML || ("<!DOCTYPE html>\n" + document.documentElement.outerHTML);
+  const re = /let FROZEN = [^\n]*; \/\/ FROZEN_CONFIG/;
+  if(!re.test(html)){ toast("未找到固化锚点，生成失败。请确认使用的是本工具生成的原始文件。","bad"); return; }
+  html = html.replace(re, "let FROZEN = " + JSON.stringify(payload) + "; // FROZEN_CONFIG");
+  const blob = new Blob([html], {type:"text/html;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "居家照护评估_费率锁定版.html";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast("锁定版已生成并下载","ok");
+}
+
+/* ---------- 15. 示例填充 ---------- */
+function fillDemo(){
+  const set=(id,v)=>{ const el=$(id); if(el) el.value=v; };
+  set("f_name","王奶奶"); set("f_gender","女"); set("f_age","78"); set("f_weight","55"); set("f_live","独居");
+  set("f_diag","脑梗后遗症、高血压"); set("f_chronic","冠心病 8 年"); set("f_surgery","髋关节置换术后 1 月"); set("f_med","降压药每日 1 次");
+  set("f_insulin","2"); set("f_insulin_time","早、晚饭前"); set("f_oral","3"); set("f_oral_time","三餐后");
+  set("f_monitor","2"); set("f_othercare","伤口换药每 2 日 1 次");
+  set("f_consc","清醒"); set("f_cog","轻度障碍"); set("f_sense","听力下降");
+  ADL = { eat:"需协助", bath:"需协助", groom:"需协助", dress:"需协助", stool:"偶尔失禁", urine:"偶尔失禁", toilet:"需协助", transfer:"需协助", walk:"需协助", stair:"依赖" };
+  NEEDSET = { "伤口换药护理":true, "康复训练协助":true, "生命体征监测":true };
+  RISK = { fall:"高", wander:"无", pressure:"中" };
+  SELF=""; NIGHT="经常"; SVC="住家(24小时)"; GENDER_REQ="不限"; COOK_REQ="一顿饭";
+  set("f_days","26"); set("f_hours","24"); set("f_start", new Date().toISOString().slice(0,10));
+  set("f_ageReq","45 岁以下"); set("f_cookWhat","清淡软食、少油少盐"); set("f_cannot","不能久坐、不能弯腰搬重物");
+  syncFormFromState();
+  saveForm();
+  runMatch({scroll:true});
+  toast("已填入示例评估并生成结果","ok");
+}
+
+/* ---------- 16. 顶栏菜单（手机） ---------- */
+function initMenu(){
+  const mb=$("btnMenu"), m=$("headMenu");
+  if(!mb || !m) return;
+  mb.addEventListener("click", e=>{ e.stopPropagation(); m.classList.toggle("open"); });
+  document.addEventListener("click", e=>{ if(!m.contains(e.target)) m.classList.remove("open"); });
+  m.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      m.classList.remove("open");
+      const act=b.dataset.act;
+      if(act==="export") exportCfg();
+      else if(act==="import"){ if(guardAdmin()) $("jsonInput").click(); }
+      else if(act==="freeze") makeLockedCopy();
+      else if(act==="reset"){ if(guardAdmin()) resetAll(); }
+    });
+  });
+}
+
+/* ---------- 17. 初始化 ---------- */
+function init(){
+  load();
+  refreshSyncMeta();
+  pullRemoteConfig();
+  loadOrg();
+  showStep(1);
+  renderADL(); renderNeeds(); renderAllChips();
+  loadForm();
+  syncFormFromState();
+  renderRoster(); renderRules(); renderWeights();
+
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>switchTab(t.dataset.tab));
+  });
+  document.querySelectorAll("#bnav .bi").forEach(b=>{
+    b.addEventListener("click", ()=>switchTab(b.dataset.tab));
+  });
+
+  document.querySelectorAll(".lockbtn").forEach(b=>{
+    b.addEventListener("click", ()=>tryUnlock(b.dataset.pane));
+  });
+  document.querySelectorAll(".lockpwd").forEach(inp=>{
+    inp.addEventListener("keydown", e=>{
+      if(e.key==="Enter"){ tryUnlock(inp.closest(".lockoverlay").id.replace("lock-","")); }
+    });
+  });
+
+  $("btnMatch").addEventListener("click", ()=>runMatch({scroll:true}));
+  $("btnCopyPack").addEventListener("click", copySyncPack);
+  $("btnDlPack").addEventListener("click", downloadSyncPack);
+  $("btnSaveRec").addEventListener("click", saveRecord);
+  $("askClear").addEventListener("click", ()=>{ closeAsk(); clearForm(); });
+  $("askLater").addEventListener("click", closeAsk);
+  $("askBackdrop").addEventListener("click", closeAsk);
+  renderRecords();
+  $("btnAddWorker").addEventListener("click", ()=>{
+    ROSTER.push({id:"w"+Date.now(),name:"新护理员",gender:"女",age:45,levels:["轻度依赖"],skills:["生活照护"],certs:["健康证"],years:3,note:""});
+    save(); renderRoster();
+  });
+  $("btnExport").addEventListener("click", exportCfg);
+  $("btnImport").addEventListener("click", ()=>{ if(guardAdmin()) $("jsonInput").click(); });
+  $("jsonInput").addEventListener("change", e=>{ if(e.target.files[0]) importCfg(e.target.files[0]); e.target.value=""; });
+  $("btnReset").addEventListener("click", ()=>{ if(guardAdmin()) resetAll(); });
+  const bf = $("btnFreeze"); if(bf) bf.addEventListener("click", makeLockedCopy);
+  $("btnPrint").addEventListener("click", ()=>window.print());
+  $("btnQuote").addEventListener("click", buildQuoteSheet);
+  $("btnWork").addEventListener("click", buildWorkSheet);
+  $("sheetClose").addEventListener("click", closeSheet);
+  $("sheetBackdrop").addEventListener("click", closeSheet);
+  $("sheetPrint").addEventListener("click", printSheet);
+  $("sheetPng").addEventListener("click", exportSheetPng);
+  $("sheetTxt").addEventListener("click", exportWorkTxt);
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+  $("btnCopy").addEventListener("click", copySummary);
+  $("fabRun").addEventListener("click", ()=>runMatch({scroll:true}));
+
+  // 手机端分步向导
+  $("wizPrev").addEventListener("click", ()=>showStep(stepNow-1));
+  $("wizNext").addEventListener("click", ()=>{
+    if(stepNow>=5){ runMatch({scroll:true}); }
+    else showStep(stepNow+1);
+  });
+
+  // 表单变化 → 自动保存 + 实时更新结果
+  document.addEventListener("input", e=>{
+    if(!$("pane-assess").contains(e.target)) return;
+    saveForm();
+    scheduleAutoRun();
+  });
+  document.addEventListener("change", e=>{
+    if(!$("pane-assess").contains(e.target)) return;
+    saveForm();
+    scheduleAutoRun();
+  });
+
+  // PWA 离线缓存：仅在 https 环境注册 Service Worker（file:// 下自动跳过）
+  if("serviceWorker" in navigator && /^https:/.test(location.protocol)){
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  }
+
+  initInstallBar();
+  initMenu();
+  updateTabLocks();
+  ADMIN_TABS.forEach(applyLock);
+
+  // 默认值
+  if(!$("f_days").value) $("f_days").value = 26;
+  if(!$("f_start").value) $("f_start").value = new Date().toISOString().slice(0,10);
+
+  // 若本地已有选好的服务类型，直接恢复上次结果
+  if(SVC) runMatch({scroll:false});
+  else { const st=$("matchState"); if(st) st.textContent = "请选择「期望服务类型」，结果将实时更新"; }
+}
+/* timer test */
+setTimeout(()=>{ try{ init(); }catch(e){ console.error(e); document.body.insertAdjacentHTML("beforeend",'<div style="padding:20px;color:#b23b3b">初始化异常：'+e.message+'</div>'); } },0);
+})();
+</script>
+</body>
+</html>
