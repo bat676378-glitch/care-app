@@ -367,6 +367,7 @@ table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);out
   body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px)}
   .topbar .hbtns{display:none}
   .menu-btn{display:inline-flex}
+  .topbar{position:static}
   .hbar{height:auto;min-height:56px;flex-wrap:wrap;gap:8px;padding:8px 0}
   .hbar h1{font-size:14.5px}
   .hbar .sub{display:none}
@@ -420,8 +421,6 @@ table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);out
   .fab.show{display:inline-flex}
   /* 触控目标与可读性 */
   .menu-btn{min-width:44px;min-height:44px;padding:0 10px}
-  .float-result{display:inline-flex;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);z-index:70;height:46px;padding:0 20px;font-size:14px;border-radius:23px;box-shadow:0 8px 24px rgba(45,40,32,.3);justify-content:center}
-  .float-result[hidden]{display:none}
   .btn.sm{min-height:44px;padding:0 14px}
   .note{font-size:13px}
   .adl .nm{font-size:14px}
@@ -448,7 +447,7 @@ table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);out
   .stepsbar .sd.cur .d{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
   .stepsbar .sd.cur i{color:var(--brand);font-weight:600}
   .stepsbar .sd.on.cur::before{background:var(--ok)}
-  .wiznav{display:flex;align-items:center;gap:10px;position:sticky;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 10px);z-index:40;background:rgba(245,243,239,.92);backdrop-filter:blur(6px);padding:10px 2px;margin:4px 0 0;border-radius:12px}
+  .wiznav{display:flex;align-items:center;gap:10px;position:static;background:rgba(245,243,239,.92);padding:10px 2px;margin:4px 0 0;border-radius:12px}
   .wiznav .btn{flex:1;height:44px;justify-content:center;font-size:14px}
   .wiznav .wizpos{font-size:12px;color:var(--ink3);white-space:nowrap}
   .step{display:none}
@@ -826,11 +825,6 @@ table.grid2t input:focus,table.grid2t select:focus{border-color:var(--brand);out
   生成匹配 · 报价
 </button>
 
-<!-- 手机端悬浮：查看结果 -->
-<button class="btn primary float-result" id="btnFloatResult" hidden>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
-  查看评估结果
-</button>
 
 <!-- 保存后询问是否清空 -->
 <div class="sheet-modal" id="askModal" hidden>
@@ -1430,14 +1424,6 @@ function syncFormFromState(){
   });
 }
 
-/* 手机端悬浮：查看结果 */
-function showFloatResult(show){
-  const b = $("btnFloatResult"); if(!b) return;
-  b.hidden = !show;
-  if(!show) return;
-  b.onclick = ()=>{ const r=$("resultcol"); if(r) r.scrollIntoView({behavior:"smooth", block:"start"}); };
-}
-
 /* ---------- 报价单 / 工作安排单 导出 ---------- */
 const ORGKEY = "care-org-v1";
 let ORG = { name:"智护星家政", tel:"" };
@@ -1767,7 +1753,7 @@ function runMatch(opt){
   opt = opt || {};
   collectEval();
   const svc = SVC || "";
-  if(!svc){ showFloatResult(false); $("matchState").textContent = "请先选择「期望服务类型」，选择后结果实时更新"; return false; }
+  if(!svc){ $("matchState").textContent = "请先选择「期望服务类型」，选择后结果实时更新"; return false; }
   const sc = adlScore();
   const level = finalLevel();
   const skills = derivedSkills();
@@ -1782,11 +1768,12 @@ function runMatch(opt){
   const tasks = buildTasks(level, RISK);
   renderResult({ level, sc, ranked, budget, tasks, svc, certReq, skills }, opt.scroll);
   $("matchState").textContent = `已生成 · ADL ${sc.filled}/${sc.total} 项已填 · 等级「${level}」`;
-  showFloatResult(true);
   return true;
 }
-/* 实时更新：表单变化后防抖自动重算（不打扰滚动） */
+/* 实时更新：表单变化后防抖自动重算（滚动时暂停，停止滚动后再算） */
 let autoTimer = null;
+let lastScrollAt = 0;
+window.addEventListener("scroll", ()=>{ lastScrollAt = Date.now(); }, {passive:true});
 function scheduleAutoRun(){
   if(!SVC){
     const st=$("matchState");
@@ -1795,6 +1782,7 @@ function scheduleAutoRun(){
   }
   clearTimeout(autoTimer);
   autoTimer = setTimeout(()=>{
+    if(Date.now() - lastScrollAt < 800){ scheduleAutoRun(); return; }
     if(runMatch({scroll:false})){
       const now = new Date();
       const hh = String(now.getHours()).padStart(2,"0"), mm = String(now.getMinutes()).padStart(2,"0");
@@ -2112,7 +2100,6 @@ function clearForm(){
   if(rb) rb.innerHTML = "";
   const rc=$("resultcol"); if(rc) rc.classList.remove("has-result");
   const st=$("matchState"); if(st) st.textContent="";
-  showFloatResult(false);
   showStep(1);
   toast("表单已清空，可评估下一位","ok");
 }
