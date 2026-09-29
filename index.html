@@ -1299,6 +1299,76 @@ body.light .hd-main{animation:decoBreath 7s ease-in-out infinite,hdPulse 9s ease
 .hd-main circle[fill="#22D3EE"],.hd-main circle[fill="#F0ABFC"],.hd-main circle[fill="#67E8F9"],.hd-main circle[fill="#A78BFA"]{animation:hdDotsRev 20s linear infinite;transform-origin:150px 150px;transform-box:view-box}
 @keyframes hdDotsRev{to{transform:rotate(-360deg)}}
 @media(prefers-reduced-motion:reduce){.hd-main circle[fill="#22D3EE"],.hd-main circle[fill="#F0ABFC"],.hd-main circle[fill="#67E8F9"],.hd-main circle[fill="#A78BFA"]{animation:none}}
+
+/* ===== v3 Logo 加大 + 羽化晕染融合 ===== */
+.hero-logo-wrap{width:142px;height:142px;margin:0 auto 10px!important;flex:0 0 auto}
+.hero-logo-wrap::before{inset:-64px;background:radial-gradient(circle,rgba(139,92,246,.46) 0%,rgba(34,211,238,.20) 40%,rgba(139,92,246,.05) 64%,transparent 76%);filter:blur(2px);animation:logoHalo 5s ease-in-out infinite}
+.hero-logo-wrap::after{content:"";position:absolute;inset:-96px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.38) 0%,rgba(34,211,238,.16) 28%,rgba(139,92,246,.04) 52%,transparent 70%);filter:blur(10px);pointer-events:none;animation:logoHalo2 6.5s ease-in-out infinite}
+.hero-logo{width:142px;height:142px!important;margin:0 auto;display:block;filter:drop-shadow(0 0 22px rgba(167,139,250,.6)) drop-shadow(0 0 60px rgba(139,92,246,.4));animation:logoBreath 4.2s ease-in-out infinite;-webkit-mask-image:radial-gradient(circle,black 46%,rgba(0,0,0,.82) 62%,transparent 76%);mask-image:radial-gradient(circle,black 46%,rgba(0,0,0,.82) 62%,transparent 76%)}
+@keyframes logoHalo{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes logoHalo2{0%,100%{opacity:.6;transform:scale(.97)}50%{opacity:.95;transform:scale(1.05)}}
+@media(min-width:900px){
+  .hero-logo-wrap{width:170px;height:170px;margin:0 auto 14px!important}
+  .hero-logo-wrap::before{inset:-78px}
+  .hero-logo-wrap::after{inset:-118px}
+  .hero-logo{width:170px;height:170px!important}
+}
+
+/* ===== v3 交互动效增强 ===== */
+/* hero 入场编排 */
+.hero-logo-wrap,.hero-words,.metrics{opacity:0;transform:translateY(16px);animation:heroIn .8s cubic-bezier(.22,1,.36,1) forwards}
+.hero-words{animation-delay:.12s}
+.metrics{animation-delay:.22s}
+@keyframes heroIn{to{opacity:1;transform:none}}
+/* 指标按压 */
+.mt{transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.mt:active{transform:scale(.93)}
+.mt b{display:inline-block;transition:color .3s,text-shadow .3s;cursor:pointer}
+.v3bounce{animation:v3bounce .5s cubic-bezier(.22,1,.36,1)}
+@keyframes v3bounce{0%{transform:scale(1)}35%{transform:scale(1.28)}70%{transform:scale(.93)}100%{transform:scale(1)}}
+/* 卡片交互动效 */
+.gcard,.card.step{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s,border-color .3s}
+.gcard:active,.card.step:active{transform:scale(.97)}
+/* 按钮按压 */
+.btn{transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .25s,filter .25s}
+.btn:active{transform:scale(.95)}
+.btn.primary:active{filter:brightness(1.18)}
+/* 导航按压 */
+.tab{transition:transform .2s,color .25s,background .25s}
+.tab:active{transform:scale(.92)}
+.tab svg{transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.tab:active svg{transform:scale(1.18)}
+/* 滚动渐显 */
+.grid-app .gcard,.card.step{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
+.grid-app .gcard.in,.card.step.in{opacity:1;transform:none}
+/* 涟漪 */
+.v3ripple{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(240,171,252,.5) 0%,rgba(139,92,246,.22) 45%,transparent 70%);transform:scale(0);animation:v3ripple .7s ease-out forwards;pointer-events:none;z-index:6}
+@keyframes v3ripple{to{transform:scale(1);opacity:0}}
+/* 圆环互动加速 */
+.hero-deco:hover .hd-main{animation-duration:20s,4.5s,20s}
+.hero-deco:hover .hd-main circle[stroke-dasharray]{animation-duration:9s}
+.hero-deco:active .hd-main{animation-duration:16s,3.6s,16s}
+/* 桌面悬停 */
+@media(hover:hover){
+  .mt:hover{transform:translateY(-3px)}
+  .mt:hover b{color:#F0ABFC;text-shadow:0 0 18px rgba(240,171,252,.65)}
+  .gcard:hover,.card.step:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(76,29,149,.42)}
+  .gcard:hover{border-color:rgba(167,139,250,.55)}
+  .hero-words h1{transition:letter-spacing .4s,text-shadow .4s}
+  .hero-words:hover h1{letter-spacing:.05em;text-shadow:0 0 30px rgba(167,139,250,.55)}
+}
+/* 浅色同步 */
+body.light .gcard:active,body.light .card.step:active{transform:scale(.97)}
+body.light .gcard:hover,body.light .card.step:hover{box-shadow:0 14px 34px rgba(124,58,237,.22)}
+@media(prefers-reduced-motion:reduce){
+  .hero-logo-wrap,.hero-words,.metrics,.grid-app .gcard,.card.step{opacity:1!important;transform:none!important;animation:none!important;transition:none!important}
+  .v3ripple{display:none!important}
+}
+
+/* ===== v3 顶部状态栏安全区适配 ===== */
+.topbar{height:auto!important;padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!important;padding-bottom:4px}
+.topbar .hbar{min-height:44px}
+body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!important}
 </style>
 </head>
 <body>
@@ -3268,6 +3338,46 @@ window.switchTab = switchTab;
   });
 })();
 
+
+/* ===== v3 交互动效 JS ===== */
+(function(){
+  try{
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return;
+    /* 涟漪 */
+    function ripple(e){
+      var t = e.currentTarget;
+      var r = document.createElement('span');
+      r.className = 'v3ripple';
+      var rect = t.getBoundingClientRect();
+      var d = Math.max(rect.width, rect.height) * 1.15;
+      r.style.width = r.style.height = d + 'px';
+      r.style.left = (e.clientX - rect.left - d/2) + 'px';
+      r.style.top = (e.clientY - rect.top - d/2) + 'px';
+      t.appendChild(r);
+      setTimeout(function(){ if(r.parentNode) r.parentNode.removeChild(r); }, 720);
+    }
+    var hw = document.querySelector('.hero-logo-wrap');
+    if(hw){ hw.style.position='relative'; hw.addEventListener('click', ripple); }
+    /* 指标数字弹跳 */
+    document.querySelectorAll('.mt b').forEach(function(b){
+      b.addEventListener('click', function(){
+        b.classList.remove('v3bounce'); void b.offsetWidth; b.classList.add('v3bounce');
+      });
+    });
+    /* 滚动渐显 */
+    var cards = document.querySelectorAll('.grid-app .gcard, .card.step');
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(es){
+        es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, {threshold:.12});
+      cards.forEach(function(c){ io.observe(c); });
+      setTimeout(function(){ cards.forEach(function(c){ c.classList.add('in'); }); }, 1600);
+    } else {
+      cards.forEach(function(c){ c.classList.add('in'); });
+    }
+  }catch(err){}
+})();
 </script>
 </body>
 </html>
