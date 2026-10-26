@@ -1538,6 +1538,7 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
               <div class="f"><label>年龄</label><input id="f_age" type="number" inputmode="numeric" placeholder="如 78" /></div>
               <div class="f"><label>体重 (kg)</label><input id="f_weight" type="number" inputmode="decimal" placeholder="如 62" /></div>
               <div class="f"><label>与谁同住</label><input id="f_live" placeholder="如 独居 / 与配偶" autocomplete="off" /></div>
+              <div class="f"><label>家庭地址</label><input id="f_addr" placeholder="如 呼和浩特市××区××小区×栋×单元" autocomplete="off" /></div>
             </div>
           </div>
         </div>
@@ -1546,8 +1547,8 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
           <div class="ch"><span class="n">2</span><h2>健康状况与医疗信息</h2></div>
           <div class="cb">
             <div class="grid g2">
-              <div class="f"><label>主要疾病 / 诊断</label><input id="f_diag" placeholder="如 脑梗后遗症、高血压" autocomplete="off" /></div>
-              <div class="f"><label>慢性病史</label><input id="f_chronic" placeholder="如 冠心病 10 年" autocomplete="off" /></div>
+              <div class="f"><label>主要疾病（当前主要病症）</label><input id="f_diag" placeholder="如 脑梗后遗症、高血压" autocomplete="off" /></div>
+              <div class="f"><label>慢性病（长期慢性病史）</label><input id="f_chronic" placeholder="如 冠心病、糖尿病" autocomplete="off" /></div>
               <div class="f"><label>近期住院 / 手术</label><input id="f_surgery" placeholder="如 髋关节置换术后 1 月" autocomplete="off" /></div>
               <div class="f"><label>目前用药情况</label><input id="f_med" placeholder="如 降压药每日 1 次" autocomplete="off" /></div>
             </div>
@@ -1591,7 +1592,7 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
               <div class="f"><label>期望服务类型（必选，选择后结果实时更新）</label><div class="chips" id="svcBox"></div></div>
             </div>
             <div class="grid g3">
-              <div class="f"><label>每月服务天数（基准 26 天 / 休 4 天；每多 1 天 +150）</label><input id="f_days" type="number" inputmode="numeric" placeholder="如 26" /></div>
+              <div class="f"><label>服务天数（住家/白班填每月天数，基准26天、每多1天+150；钟点/临时填每周次数）</label><input id="f_days" type="number" inputmode="numeric" placeholder="住家/白班填月天数，钟点/临时填每周次数" /></div>
               <div class="f"><label>每日时长（小时）</label><input id="f_hours" type="number" inputmode="numeric" placeholder="如 24" /></div>
               <div class="f"><label>期望开始日期</label><input id="f_start" type="date" /></div>
             </div>
@@ -1601,6 +1602,7 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
               <div class="f"><label>对护工的性别要求</label><div class="chips" id="genderReqBox"></div></div>
               <div class="f"><label>对护工的年龄要求（填写，如 45岁以下 / 40-55岁）</label><input id="f_ageReq" placeholder="如 40-55岁" autocomplete="off" /></div>
               <div class="f"><label>客户对做饭的要求</label><div class="chips" id="cookReqBox"></div></div>
+              <div class="f"><label>是否需要协助洗浴（不需要则不收洗浴费）</label><div class="chips" id="bathBox"></div></div>
               <div class="f"><label>需要做什么饭（口味／菜式，填写）</label><input id="f_cookWhat" placeholder="如 清淡软食 / 少油少盐 / 北方家常菜" autocomplete="off" /></div>
             </div>
             <div class="f" style="margin-top:12px"><label>因病情／身体情况不能做的事 / 照护禁忌（填写）</label><input id="f_cannot" placeholder="如 不能久坐、不能弯腰搬重物、忌口/不能吃的食物、不做剧烈活动……" autocomplete="off" /></div>
@@ -1667,6 +1669,7 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
     <div class="card">
       <div class="ch"><h2>护理员名册</h2><span class="hint" style="margin-left:auto">技能标签用「、」或「,」分隔</span></div>
       <div class="cb">
+        <div class="rowflex" style="margin-bottom:10px"><button class="btn sm" id="btnLockWorkers"></button><span class="hint" style="margin-left:8px">开关需管理员密码；关闭后，评估结果、报价单、工作单、复制摘要与记录都不显示护工姓名（价格照常）。经「配置同步」下发后，对所有用户统一生效。</span></div>
         <div class="tblscroll">
           <table class="grid2t" id="rosterTable"></table>
         </div>
@@ -1729,11 +1732,14 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
         <div class="grid g3" id="nightPrices"></div>
         <div class="grid g3" style="margin-top:12px" id="riskPrices"></div>
         <div class="grid g2" style="margin-top:12px" id="cookPrices"></div>
+        <div class="grid g2" style="margin-top:12px" id="bathPrices"></div>
         <div class="grid g2" style="margin-top:12px">
           <div class="f"><label>中介/服务费（相当于几个月工资，一次性）</label><input id="r_agency" type="number" inputmode="decimal" step="0.5" /></div>
           <div class="f"><label>每日计费天数基准（月）</label><input id="r_monthdays" type="number" inputmode="decimal" step="0.01" /></div>
           <div class="f"><label>每月基准服务天数（住家/白班，默认 26 天、休 4 天）</label><input id="r_basedays" type="number" inputmode="numeric" /></div>
           <div class="f"><label>每多服务 1 天加价（元/天）</label><input id="r_extrafee" type="number" inputmode="numeric" /></div>
+          <div class="f"><label>短期报价系数（总报价 ×，默认 1.10）</label><input id="r_shortmul" type="number" inputmode="decimal" step="0.01" /></div>
+          <div class="f"><label>长期报价系数（总报价 ×，默认 1.05）</label><input id="r_longmul" type="number" inputmode="decimal" step="0.01" /></div>
         </div>
       </div>
     </div>
@@ -1776,8 +1782,9 @@ body.light .topbar{padding-top:calc(env(safe-area-inset-top, 0px) + 10px)!import
   <section class="tabpane" id="pane-records">
     <div class="recs-head">
       <h2>评估记录</h2>
-      <span class="hint">每次点「保存本次评估」，报价、任务清单与护工匹配都会分别存到这里</span>
+      <span class="hint">每次点「保存本次评估」，报价、任务清单与护工匹配都会分别存到这里（最多保留 100 条）</span>
     </div>
+    <div id="recClearBar" style="margin-bottom:10px;display:none"><button class="btn ghost sm danger" id="btnClearRecs">清空全部记录</button></div>
     <div id="recordsBox"></div>
   </section>
 
@@ -1899,7 +1906,7 @@ const ADL_ITEMS = [
   {k:"walk", n:"平地行走",             a:"平地行走|行走",   opts:["独立","需协助","依赖"]},
   {k:"stair",n:"上下楼梯",             a:"上下楼梯|楼梯",   opts:["独立","需协助","依赖"]}
 ];
-const NEEDS = ["鼻饲/胃管护理","导尿管护理","压疮/褥疮护理","吸痰护理","伤口换药护理","注射/胰岛素","生命体征监测","康复训练协助","夜间起夜照护","吸氧护理"];
+const NEEDS = ["鼻饲/胃管护理","导尿管护理","压疮/褥疮护理","吸痰护理","伤口换药护理","注射/胰岛素","生命体征监测","康复训练协助","吸氧护理"];
 const LEVELS = ["无","低","中","高"];
 const SELFCARE = ["完全自理","轻度依赖","中度依赖","重度依赖"];
 const NIGHTS = ["无","偶尔","经常","整夜"];
@@ -1931,11 +1938,12 @@ const DEFAULT_ROSTER = [
 const DEFAULT_RULES = {
   base:{ home:4200, day:3600, hour:40, temp:240 },
   levelFactor:{ "完全自理":0.90, "轻度依赖":1.12, "中度依赖":1.40, "重度依赖":1.72 },
-  medical:{ "鼻饲/胃管护理":800,"导尿管护理":700,"压疮/褥疮护理":800,"吸痰护理":800,"伤口换药护理":500,"注射/胰岛素":600,"生命体征监测":300,"康复训练协助":500,"夜间起夜照护":400,"吸氧护理":400 },
+  medical:{ "鼻饲/胃管护理":800,"导尿管护理":700,"压疮/褥疮护理":800,"吸痰护理":800,"伤口换药护理":500,"注射/胰岛素":600,"生命体征监测":300,"康复训练协助":500,"吸氧护理":400 },
   night:{ "无":0, "偶尔":350, "经常":800, "整夜":1400 },
   risk:{ "无":0, "低":80, "中":250, "高":500 },
   cook:{ "不需要":0, "一顿饭":250, "两顿饭":500, "三顿饭":750 },
-  agency:1, monthDays:30, baseServiceDays:26, extraDayFee:150
+  bath:{ "需要":200, "不需要":0 },
+  agency:0, monthDays:30, baseServiceDays:26, extraDayFee:150, shortMul:1.10, longMul:1.05
 };
 
 const DEFAULT_WEIGHTS = { level:22, skill:22, cert:13, medical:13, exp:8, gender:12, cook:10 };
@@ -1957,7 +1965,8 @@ let EVAL = {};           // 评估数据
 let ADL  = {};           // {k:选择}
 let NEEDSET = {};        // {need:true}
 let RISK = { fall:"", wander:"", pressure:"" };
-let SELF = "", NIGHT = "", SVC = "", GENDER_REQ = "", COOK_REQ = "";
+let SELF = "", NIGHT = "", SVC = "", GENDER_REQ = "", COOK_REQ = "", BATH_REQ = "需要";
+let SHOW_WORKERS = true; // 名册展示锁：开=结果/导出显示护工，关=隐藏护工（费用照常）
 
 /* ---------- 配置云端同步（管理员发布 → 客户端自动拉取） ---------- */
 const LSVER = "care-match-cfg-ver";
@@ -1972,7 +1981,21 @@ function refreshSyncMeta(){
   const el = $("syncMeta"); if(el) el.textContent = syncMetaText();
 }
 function buildSyncPack(){
-  return { app:"居家照护评估配置", version:cfgVer(), savedAt:cfgSavedAt(), ROSTER, RULES, WEIGHTS };
+  return { app:"居家照护评估配置", version:cfgVer(), savedAt:cfgSavedAt(), ROSTER, RULES, WEIGHTS, showWorkers: SHOW_WORKERS };
+}
+function refreshLockBtn(){
+  const b=$("btnLockWorkers"); if(!b) return;
+  b.textContent = SHOW_WORKERS ? "护工信息显示：开" : "护工信息显示：关";
+  b.style.background = SHOW_WORKERS ? "#2E7D4F" : "#B23B3B";
+  b.style.color = "#fff"; b.style.border = "none";
+}
+function toggleWorkersLock(){
+  if(!guardAdmin()){ toast("开关名册需要管理员密码","bad"); return; }
+  SHOW_WORKERS = !SHOW_WORKERS;
+  try{ localStorage.setItem("care-show-workers-v1", SHOW_WORKERS?"1":"0"); }catch(e){}
+  refreshLockBtn();
+  if(SVC) runMatch({scroll:false});
+  toast(SHOW_WORKERS?"护工信息已设为显示（经「同步配置」下发后对所有人生效）":"护工信息已设为隐藏（价格照常；经「同步配置」下发后对所有人生效）","ok");
 }
 function fallbackCopy(txt, done){
   const ta = document.createElement("textarea");
@@ -2002,6 +2025,11 @@ function applyRemotePack(o){
   if(o.ROSTER) ROSTER = o.ROSTER;
   if(o.RULES)  RULES  = Object.assign(JSON.parse(JSON.stringify(DEFAULT_RULES)), o.RULES);
   if(o.WEIGHTS)WEIGHTS= Object.assign(JSON.parse(JSON.stringify(DEFAULT_WEIGHTS)), o.WEIGHTS);
+  if(o.showWorkers!==undefined){
+    SHOW_WORKERS = !!o.showWorkers;
+    try{ localStorage.setItem("care-show-workers-v1", SHOW_WORKERS?"1":"0"); }catch(e){}
+    refreshLockBtn();
+  }
   save();
   setCfgVer(Math.max(cfgVer(), parseInt(o.version||"0",10)));
   if(o.savedAt){ try{ localStorage.setItem("care-cfg-savedAt", o.savedAt); }catch(e){} }
@@ -2049,10 +2077,13 @@ function syncRules(){
   RULES.night       = syncFixedObj(DEFAULT_RULES.night, RULES.night);
   RULES.risk        = syncFixedObj(DEFAULT_RULES.risk, RULES.risk);
   RULES.cook        = syncFixedObj(DEFAULT_RULES.cook, RULES.cook);
+  RULES.bath        = syncFixedObj(DEFAULT_RULES.bath, RULES.bath);
   if(RULES.agency===undefined) RULES.agency = DEFAULT_RULES.agency;
   if(RULES.monthDays===undefined) RULES.monthDays = DEFAULT_RULES.monthDays;
   if(RULES.baseServiceDays===undefined) RULES.baseServiceDays = DEFAULT_RULES.baseServiceDays;
   if(RULES.extraDayFee===undefined) RULES.extraDayFee = DEFAULT_RULES.extraDayFee;
+  if(RULES.shortMul===undefined) RULES.shortMul = DEFAULT_RULES.shortMul;
+  if(RULES.longMul===undefined) RULES.longMul = DEFAULT_RULES.longMul;
 }
 
 function save(){
@@ -2078,8 +2109,8 @@ function load(){
 /* ---------- 评估表单的本地保存（刷新不丢） ---------- */
 function saveForm(){
   try{
-    const data = { fields:{}, ADL, NEEDSET, RISK, SELF, NIGHT, SVC, GENDER_REQ, COOK_REQ };
-    ["f_name","f_gender","f_age","f_weight","f_live","f_diag","f_chronic","f_surgery","f_med",
+    const data = { fields:{}, ADL, NEEDSET, RISK, SELF, NIGHT, SVC, GENDER_REQ, COOK_REQ, BATH_REQ };
+    ["f_name","f_gender","f_age","f_weight","f_live","f_addr","f_diag","f_chronic","f_surgery","f_med",
      "f_insulin","f_insulin_time","f_oral","f_oral_time","f_monitor","f_othercare","f_consc","f_cog","f_sense",
      "f_days","f_hours","f_start","f_ageReq","f_cookWhat","f_cannot"].forEach(id=>{
       const el=$(id); if(el) data.fields[id]=el.value;
@@ -2100,6 +2131,7 @@ function loadForm(){
     if(o.SVC!=null) SVC=o.SVC;
     if(o.GENDER_REQ!=null) GENDER_REQ=o.GENDER_REQ;
     if(o.COOK_REQ!=null) COOK_REQ=o.COOK_REQ;
+    if(o.BATH_REQ!=null) BATH_REQ=o.BATH_REQ;
   }catch(e){}
 }
 
@@ -2148,6 +2180,7 @@ function renderAllChips(){
   chipRow($("svcBox"), SERVICES, (v,btn,cont)=>{ SVC = (SVC===v? "":v); toggleOn(cont, SVC?btn:null); });
   chipRow($("genderReqBox"), GENDER_REQS, (v,btn,cont)=>{ GENDER_REQ = (GENDER_REQ===v? "":v); toggleOn(cont, GENDER_REQ?btn:null); });
   chipRow($("cookReqBox"), COOKS, (v,btn,cont)=>{ COOK_REQ = (COOK_REQ===v? "":v); toggleOn(cont, COOK_REQ?btn:null); });
+  chipRow($("bathBox"), ["需要","不需要"], (v,btn,cont)=>{ BATH_REQ = v; toggleOn(cont, btn); });
 }
 
 /* ---------- 4. 渲染名册 ---------- */
@@ -2208,6 +2241,9 @@ function renderRules(){
   $("r_monthdays").oninput = ()=>{ RULES.monthDays=Number($("r_monthdays").value)||30; save(); };
   $("r_basedays").oninput = ()=>{ RULES.baseServiceDays=Number($("r_basedays").value)||26; save(); showBaseFormula(); };
   $("r_extrafee").oninput = ()=>{ RULES.extraDayFee=Number($("r_extrafee").value)||0; save(); showBaseFormula(); };
+  $("r_shortmul").value = RULES.shortMul; $("r_longmul").value = RULES.longMul;
+  $("r_shortmul").oninput = ()=>{ RULES.shortMul=Number($("r_shortmul").value)||1.10; save(); };
+  $("r_longmul").oninput = ()=>{ RULES.longMul=Number($("r_longmul").value)||1.05; save(); };
 
   $("r_orgname").value = ORG.name;
   $("r_orgtel").value = ORG.tel;
@@ -2233,6 +2269,10 @@ function renderRules(){
   const rc=$("cookPrices"); rc.innerHTML="";
   Object.keys(RULES.cook).forEach(k=>{
     rc.appendChild(field("做饭·"+k+" 加价 (元/月)", RULES.cook[k], v=>{ RULES.cook[k]=v; save(); }));
+  });
+  const bp=$("bathPrices"); bp.innerHTML="";
+  Object.keys(RULES.bath||{}).forEach(k=>{
+    bp.appendChild(field("洗浴·"+k+" 加价 (元/月)", RULES.bath[k], v=>{ RULES.bath[k]=v; save(); }));
   });
   showBaseFormula();
   applyRulesFrozenState();
@@ -2395,7 +2435,7 @@ function syncFormFromState(){
     const key=c.dataset.risk;
     c.querySelectorAll(".chip").forEach(b=>b.classList.toggle("on", b.dataset.v===RISK[key]));
   });
-  [[$("selfcareBox"),SELF],[$("nightBox"),NIGHT],[$("svcBox"),SVC],[$("genderReqBox"),GENDER_REQ],[$("cookReqBox"),COOK_REQ]].forEach(([box,val])=>{
+  [[$("selfcareBox"),SELF],[$("nightBox"),NIGHT],[$("svcBox"),SVC],[$("genderReqBox"),GENDER_REQ],[$("cookReqBox"),COOK_REQ],[$("bathBox"),BATH_REQ]].forEach(([box,val])=>{
     if(!box) return;
     box.querySelectorAll(".chip").forEach(b=>b.classList.toggle("on", b.dataset.v===val));
   });
@@ -2426,7 +2466,8 @@ function buildQuoteSheet(){
     <div class="s-sec">客户与评估信息</div>
     <div class="s-row"><span>被照护人：${esc(p.name||"（未填）")}${p.gender? " · "+esc(p.gender):""}${p.age? " · "+esc(p.age)+"岁":""}${p.weight? " · "+esc(p.weight)+"kg":""}</span><span>居住情况：${esc(p.live||"—")}</span></div>
     <div class="s-row"><span>主要疾病：${esc(p.diag||"—")}</span><span>用药情况：${esc(p.med||"—")}</span></div>
-    ${p.surgery? `<div class="s-row"><span>近期手术：${esc(p.surgery)}</span></div>`:""}
+    <div class="s-row"><span>慢性病：${esc(p.chronic||"—")}</span>${p.surgery? `<span>近期手术：${esc(p.surgery)}</span>`:""}</div>
+    <div class="s-row"><span>护工要求：${p.genderReq? "性别 "+esc(p.genderReq):"性别不限"}${p.ageReq? " · 年龄 "+esc(p.ageReq):""}</span></div>
     <div class="s-sec">服务方案</div>
     <div class="s-row"><span>护理等级：<b>${esc(o.level)}</b></span><span>服务类型：<b>${esc(o.svc)}</b></span></div>
     <div class="s-row"><span>每日时长：${esc(p.hours||"—")} 小时</span><span>每月天数：${esc(p.days||"—")} 天</span><span>开始日期：${sheetDate()}</span></div>
@@ -2437,16 +2478,18 @@ function buildQuoteSheet(){
       <tr><td>护理等级系数（${esc(o.level)}）</td><td>× ${budget.lf}</td></tr>
       <tr><td>等级调整后基础费</td><td>${money(budget.base*budget.lf)}</td></tr>
       ${medRows}
-      <tr><td>夜间护理加价（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>
+      <tr><td>夜间护理价格（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>
       <tr><td>风险管控加价</td><td>+${money(budget.riskSum)}</td></tr>
       <tr><td>做饭要求加价（${esc(COOK_REQ||"不需要")}）</td><td>+${money(budget.cookSum)}</td></tr>
+      <tr><td>洗浴协助（${esc(BATH_REQ||"需要")}）</td><td>+${money(budget.bathSum||0)}</td></tr>
       ${budget.extraDaySum? `<tr><td>超出基准服务天数加价（多 ${budget.extraDays} 天）</td><td>+${money(budget.extraDaySum)}</td></tr>`:""}
       <tr class="s2"><td>预估月总费用</td><td>${money(budget.total)}</td></tr>
-      <tr class="st"><td>短期最终价格（总报价 +10%）</td><td>${money(budget.total*1.10)}</td></tr>
-      <tr class="st"><td>长期最终价格（总报价 +5%）</td><td>${money(budget.total*1.05)}</td></tr>
+      ${(RULES.agency||0)>0? `<tr><td>一次性中介/服务费（${RULES.agency}个月，一次性收取）</td><td>${money(budget.agency)}</td></tr>`:""}
+      <tr class="st"><td>短期最终价格（总报价 ×${RULES.shortMul}）</td><td>${money(budget.total*(RULES.shortMul||1.10))}</td></tr>
+      <tr class="st"><td>长期最终价格（总报价 ×${RULES.longMul}）</td><td>${money(budget.total*(RULES.longMul||1.05))}</td></tr>
     </table>
-    <div class="s-sec">推荐照护人员</div>
-    <div class="s-row">${ranked.slice(0,3).map((r,i)=>`<span>${i+1}. ${esc(r.w.name)}（${r.s.total.toFixed(0)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验</span>`).join("")}</div>
+    ${SHOW_WORKERS? `<div class="s-sec">推荐照护人员</div>
+    <div class="s-row">${ranked.slice(0,3).map((r,i)=>`<span>${i+1}. ${esc(r.w.name)}（${r.s.total.toFixed(0)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验</span>`).join("")}</div>` : `<div class="s-sec">照护人员</div><div class="s-row">由机构统一匹配安排，面试通过后告知。</div>`}
     <div class="s-sec">服务内容要点（${tasks.length} 项）</div>
     <ul class="s-tasks">${tasks.slice(0,14).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
     ${tasks.length>14? `<div class="s-row" style="font-size:11px;color:#8E949E">… 其余 ${tasks.length-14} 项详见完整任务清单</div>`:""}
@@ -2476,13 +2519,20 @@ function buildWorkSheet(){
       <div class="meta">日期 ${sheetDate()}${ORG.tel? " · 电话 "+esc(ORG.tel):""}</div>
     </div>
     <div class="s-sec">人员与客户</div>
-    <div class="s-row"><span>照护人员：<b>${w? esc(w.name):"—"}</b>${w? "（"+esc(w.gender||"")+" · "+w.age+"岁 · "+w.years+"年经验）":""}</span><span>证书：${w? esc((w.certs||[]).join(" / ")):"—"}</span></div>
-    <div class="s-row"><span>被照护人：${esc(p.name||"（未填）")}${p.gender? " · "+esc(p.gender):""}${p.age? " · "+esc(p.age)+"岁":""}</span><span>服务：${esc(o.svc)} · ${esc(o.level)}</span></div>
+    <div class="s-row"><span>照护人员：<b>${SHOW_WORKERS&&w? esc(w.name):"由机构统一安排"}</b>${SHOW_WORKERS&&w? "（"+esc(w.gender||"")+" · "+w.age+"岁 · "+w.years+"年经验）":""}</span><span>证书：${SHOW_WORKERS&&w? esc((w.certs||[]).join(" / ")):"—"}</span></div>
+    <div class="s-row"><span>护工要求：${p.genderReq? "性别 "+esc(p.genderReq):"性别不限"}${p.ageReq? " · 年龄 "+esc(p.ageReq):""}</span></div>
+    <div class="s-row"><span>被照护人：${esc(p.name||"（未填）")}${p.gender? " · "+esc(p.gender):""}${p.age? " · "+esc(p.age)+"岁":""}${p.weight? " · "+esc(p.weight)+"kg":""}</span><span>服务：${esc(o.svc)} · ${esc(o.level)}</span></div>
+    <div class="s-row"><span>家庭地址：${esc(p.addr||"—")}</span></div>
+    <div class="s-row"><span>主要疾病：${esc(p.diag||"—")}</span><span>慢性病：${esc(p.chronic||"—")}</span>${p.surgery? `<span>近期手术：${esc(p.surgery)}</span>`:""}</div>
+    <div class="s-row"><span>喂药（口服药）：${(+p.oral||0)>0? "每日 "+p.oral+" 次"+(p.oralTime? "（"+p.oralTime+"）":"") : "无"}</span><span>胰岛素：${(+p.insulin||0)>0? "每日 "+p.insulin+" 次"+(p.insulinTime? "（"+p.insulinTime+"）":"") : "无"}</span><span>监测：${(+p.monitor||0)>0? "每日 "+p.monitor+" 次" : "无"}</span></div>
     <div class="s-row"><span>服务时段：${esc(p.hours||"—")} 小时/天 · ${esc(p.days||"—")} 天/月 · 自 ${sheetDate()} 起</span></div>
     <div class="s-sec">工作内容（${tasks.length} 项，逐项执行并记录）</div>
     <ul class="s-tasks">${tasks.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
     <div class="s-sec">特别提醒</div>
     <ul class="s-tasks">
+      ${p.consc&&p.consc!=="清醒"? `<li>意识状态：${esc(p.consc)}，${p.consc==="昏迷"?"需定时观察生命体征与体位，保持呼吸道通畅":"需加强看护，留意意识变化"}</li>`:""}
+      ${p.cog&&p.cog!=="正常"? `<li>认知状况：${esc(p.cog)}，需防走失、防误服，耐心沟通、避免争执</li>`:""}
+      ${p.sense? `<li>感官情况：${esc(p.sense)}${p.sense.includes("吞咽")?"，进食需防呛咳、放慢速度":"，注意沟通与安全"}</li>`:""}
       <li>用药 / 胰岛素 / 监测等定时事项务必按时间点执行并记录，漏做及时上报</li>
       <li>出现异常情况（跌倒、发热、异常情绪等）第一时间联系家属与机构</li>
       <li>每日填写照护日志，交接班当面沟通</li>
@@ -2546,9 +2596,21 @@ function exportWorkTxt(){
   L.push(ORG.name||"居家照护服务机构");
   L.push("照护工作安排单 · " + sheetDate() + (ORG.tel? " · 电话 "+ORG.tel:""));
   L.push("=".repeat(28));
-  L.push("照护人员：" + (w? w.name+"（"+w.gender+" · "+w.age+"岁 · "+w.years+"年经验）" : "—"));
-  if(w && (w.certs||[]).length) L.push("证书：" + w.certs.join(" / "));
-  L.push("被照护人：" + (p.name||"（未填）") + (p.gender? " · "+p.gender:"") + (p.age? " · "+p.age+"岁":""));
+  if(SHOW_WORKERS && w){
+    L.push("照护人员：" + w.name+"（"+w.gender+" · "+w.age+"岁 · "+w.years+"年经验）");
+    if((w.certs||[]).length) L.push("证书：" + w.certs.join(" / "));
+  } else {
+    L.push("照护人员：由机构统一安排，面试通过后告知。");
+  }
+  L.push("被照护人：" + (p.name||"（未填）") + (p.gender? " · "+p.gender:"") + (p.age? " · "+p.age+"岁":"") + (p.weight? " · "+p.weight+"kg":""));
+  L.push("家庭地址：" + (p.addr||"—"));
+  L.push("主要疾病：" + (p.diag||"—") + " · 慢性病：" + (p.chronic||"—"));
+  if(p.surgery) L.push("近期住院/手术：" + p.surgery);
+  if(p.consc) L.push("意识状态：" + p.consc + (p.cog? " · 认知：" + p.cog : ""));
+  if(p.sense) L.push("视/听/吞咽：" + p.sense);
+  if(p.cookWhat) L.push("做饭口味/菜式：" + p.cookWhat);
+  L.push("护工要求：" + (p.genderReq? "性别 "+p.genderReq : "性别不限") + (p.ageReq? " · 年龄 "+p.ageReq : ""));
+  L.push("喂药：口服药 " + ((+p.oral||0)>0? "每日 "+p.oral+" 次"+(p.oralTime? "（"+p.oralTime+"）":"") : "无") + "；胰岛素 " + ((+p.insulin||0)>0? "每日 "+p.insulin+" 次"+(p.insulinTime? "（"+p.insulinTime+"）":"") : "无") + "；监测 " + ((+p.monitor||0)>0? "每日 "+p.monitor+" 次" : "无"));
   L.push("服务：" + o.svc + " · " + o.level + " · " + (p.hours||"—") + " 小时/天 · " + (p.days||"—") + " 天/月");
   L.push("=".repeat(28));
   L.push("工作内容（" + tasks.length + " 项）：");
@@ -2574,6 +2636,7 @@ function adlScore(){
 function autoLevel(scoreObj){
   const s=scoreObj.score;
   if(scoreObj.filled===0) return "轻度依赖";
+  if(scoreObj.filled===scoreObj.total && s>=scoreObj.max-2) return "完全自理";
   if(s<=40) return "重度依赖";
   if(s<=70) return "中度依赖";
   return "轻度依赖";
@@ -2588,17 +2651,17 @@ function finalLevel(){
 }
 function derivedSkills(){
   const set = new Set();
-  if(["需协助","依赖"].includes(ADL.bath)||["需协助","依赖"].includes(ADL.groom)) set.add("助浴");
+  if(BATH_REQ==="需要" && (["需协助","依赖"].includes(ADL.bath)||["需协助","依赖"].includes(ADL.groom))) set.add("助浴");
   if(["需协助","依赖"].includes(ADL.eat)) set.add("喂食协助");
   if(["需协助","依赖"].includes(ADL.dress)||["需协助","依赖"].includes(ADL.eat)) set.add("生活照护");
   if(["偶尔失禁","失禁"].includes(ADL.stool)||["偶尔失禁","失禁"].includes(ADL.urine)||["需协助","依赖"].includes(ADL.toilet)) set.add("如厕护理");
   if(["需协助","依赖"].includes(ADL.transfer)) { set.add("翻身拍背"); set.add("转移辅助"); }
   if(["需协助","依赖"].includes(ADL.walk)||["需协助","依赖"].includes(ADL.stair)) set.add("转移辅助");
-  NEEDS.forEach(n=>{ if(NEEDSET[n]) set.add(n); });
+  NEEDS.forEach(n=>{ if(NEEDSET[n] && n!=="夜间起夜照护") set.add(n); });
   return Array.from(set);
 }
 function derivedCertReq(){
-  const med = NEEDS.filter(n=>NEEDSET[n]);
+  const med = NEEDS.filter(n=>NEEDSET[n] && n!=="夜间起夜照护");
   const strong = ["注射/胰岛素","伤口换药护理","导尿管护理","鼻饲/胃管护理","吸氧护理"].filter(n=>NEEDSET[n]);
   if(strong.length) return { need:true, accept:["护士执业证","护士资格证"], label:"护士执业/资格证" };
   if(med.length)     return { need:true, accept:["护士执业证","护士资格证","养老护理员一级","养老护理员二级"], label:"护理员二级及以上/护士证" };
@@ -2624,7 +2687,7 @@ function scoreWorker(w, ctx){
   if(ctx.certReq.need){
     cert = (w.certs||[]).some(c=>ctx.certReq.accept.includes(c))? 100 : 35;
   }
-  const medNeed = NEEDS.filter(n=>NEEDSET[n]);
+  const medNeed = NEEDS.filter(n=>NEEDSET[n] && n!=="夜间起夜照护");
   let medical=100;
   if(medNeed.length){
     const hit=medNeed.filter(n=>(w.skills||[]).includes(n)).length;
@@ -2646,7 +2709,7 @@ function scoreWorker(w, ctx){
 }
 
 /* ---------- 9. 引擎：价格 ---------- */
-function computeBudget(level, svc, night, riskObj, cookReq, days, hours){
+function computeBudget(level, svc, night, riskObj, cookReq, bathReq, days, hours){
   const R=RULES;
   let base, formula;
   const d = days|| (svc==="住家(24小时)"?30: svc==="白班(8-12小时)"?26: 5);
@@ -2666,15 +2729,16 @@ function computeBudget(level, svc, night, riskObj, cookReq, days, hours){
   }
 
   const lf = R.levelFactor[level]!=null? R.levelFactor[level] : 1.2;
-  const medItems = NEEDS.filter(n=>NEEDSET[n]);
+  const medItems = NEEDS.filter(n=>NEEDSET[n] && n!=="夜间起夜照护");
   const medSum = medItems.reduce((a,n)=>a+(R.medical[n]||0),0);
   const nightSum = R.night[night||"无"]||0;
   const riskSum = (R.risk[riskObj.fall||"无"]||0) + (R.risk[riskObj.wander||"无"]||0) + (R.risk[riskObj.pressure||"无"]||0);
   const cookSum = R.cook[cookReq||"不需要"]||0;
-  const sub = base*lf + medSum + nightSum + riskSum + cookSum + extraDaySum;
+  const bathSum = (R.bath && R.bath[bathReq||"需要"]!=null) ? R.bath[bathReq||"需要"] : 0;
+  const sub = base*lf + medSum + nightSum + riskSum + cookSum + bathSum + extraDaySum;
   const total = sub;
   const agency = total * (R.agency||0);
-  return { base, formula, lf, medItems, medSum, nightSum, riskSum, cookSum, extraDays, extraDaySum, sub, total, agency };
+  return { base, formula, lf, medItems, medSum, nightSum, riskSum, cookSum, bathSum, extraDays, extraDaySum, sub, total, agency };
 }
 
 /* ---------- 10. 引擎：任务清单 ---------- */
@@ -2682,7 +2746,7 @@ function buildTasks(level, riskObj){
   const t=[]; const add=s=>{ if(!t.includes(s)) t.push(s); };
   if(["需协助","依赖"].includes(ADL.eat)) add("协助进食（备餐、喂食、观察吞咽）");
   if(ADL.eat==="流食") add("流食/半流食照护（食物加工成糊状或流质，少量慢喂，观察吞咽与呛咳）");
-  if(["需协助","依赖"].includes(ADL.bath)) add("协助洗澡 / 擦浴（每月 2 次）");
+  if(BATH_REQ==="需要") add("协助洗澡 / 擦浴（每月 2 次）");
   if(["需协助","依赖"].includes(ADL.groom)) add("协助修饰（洗脸、刷牙、梳头）");
   if(["需协助","依赖"].includes(ADL.dress)) add("协助穿衣、更换衣物");
   if(["偶尔失禁","失禁"].includes(ADL.stool)||["偶尔失禁","失禁"].includes(ADL.urine)) add("失禁护理（更换尿垫、皮肤清洁、定时提醒）");
@@ -2690,7 +2754,7 @@ function buildTasks(level, riskObj){
   if(["需协助","依赖"].includes(ADL.transfer)) add("辅助床椅转移 / 定时翻身拍背");
   if(["需协助","依赖"].includes(ADL.walk)) add("协助平地行走 / 使用助行器或轮椅");
   if(["需协助","依赖"].includes(ADL.stair)) add("上下楼梯安全防护（非必要避免）");
-  NEEDS.forEach(n=>{ if(NEEDSET[n]) add(n+"（按护理规范执行并记录）"); });
+  NEEDS.forEach(n=>{ if(NEEDSET[n] && n!=="夜间起夜照护") add(n+"（按护理规范执行并记录）"); });
   if(EVAL){
     const num = v => Number(v)||0;
     if(num(EVAL.insulin)>0) add(`打胰岛素：每日 ${num(EVAL.insulin)} 次${EVAL.insulinTime? "（"+EVAL.insulinTime+"）":""}，按医嘱剂量注射、轮换部位并记录`);
@@ -2720,7 +2784,7 @@ function buildTasks(level, riskObj){
 function collectEval(){
   EVAL = {
     name:$("f_name").value.trim(), gender:$("f_gender").value, age:$("f_age").value, weight:$("f_weight").value,
-    live:$("f_live").value.trim(), genderReq:(GENDER_REQ==="不限"? "":GENDER_REQ), ageReq:$("f_ageReq").value.trim(), cookReq:COOK_REQ, cookWhat:$("f_cookWhat").value.trim(), cannot:$("f_cannot").value.trim(),
+    addr:$("f_addr").value.trim(), live:$("f_live").value.trim(), genderReq:(GENDER_REQ==="不限"? "":GENDER_REQ), ageReq:$("f_ageReq").value.trim(), cookReq:COOK_REQ, cookWhat:$("f_cookWhat").value.trim(), cannot:$("f_cannot").value.trim(),
     diag:$("f_diag").value.trim(), chronic:$("f_chronic").value.trim(), surgery:$("f_surgery").value.trim(),
     med:$("f_med").value.trim(), consc:$("f_consc").value, cog:$("f_cog").value, sense:$("f_sense").value.trim(),
     insulin:$("f_insulin").value.trim(), insulinTime:$("f_insulin_time").value.trim(),
@@ -2739,7 +2803,7 @@ function runMatch(opt){
   const level = finalLevel();
   const skills = derivedSkills();
   const certReq = derivedCertReq();
-  const budget0 = computeBudget(level, svc, NIGHT||"无", RISK, COOK_REQ||"不需要", Number(EVAL.days)||0, Number(EVAL.hours)||0);
+  const budget0 = computeBudget(level, svc, NIGHT||"无", RISK, COOK_REQ||"不需要", BATH_REQ||"需要", Number(EVAL.days)||0, Number(EVAL.hours)||0);
 
   const ctx = { level, skills, certReq, budget: budget0.total, genderReq: EVAL.genderReq||"", cookReq: COOK_REQ||"不需要" };
   const ranked = ROSTER.map(w=>({ w, s:scoreWorker(w, ctx) }))
@@ -2798,6 +2862,7 @@ function priceBar(b){
   if(b.nightSum>0) items.push({l:"夜间护理", v:b.nightSum, c:"var(--info)"});
   if(b.riskSum>0) items.push({l:"风险管控", v:b.riskSum, c:"var(--warn)"});
   if(b.cookSum>0) items.push({l:"做饭", v:b.cookSum, c:"var(--purple)"});
+  if(b.bathSum>0) items.push({l:"洗浴协助", v:b.bathSum, c:"#8A6FB8"});
   if(b.extraDaySum>0) items.push({l:"超天数加价", v:b.extraDaySum, c:"var(--pink)"});
   const tot = items.reduce((s,x)=>s+x.v,0);
   if(tot<=0) return "";
@@ -2829,7 +2894,9 @@ function renderResult(o, scroll){
   </div>`;
 
   /* ---- 人 ---- */
-  html += `<div class="sec"><h3><span class="bar"></span>匹配照护人员（Top ${Math.min(3,ranked.length)}）</h3>`;
+  if(SHOW_WORKERS){
+  html += `<div class="sec"><h3><span class="bar"></span>匹配照护人员（Top ${Math.min(3,ranked.length)}）</h3>
+    <div class="hint" style="margin-bottom:8px">客户对护工要求：${EVAL.genderReq? "性别 "+EVAL.genderReq:"性别不限"}${EVAL.ageReq? " · 年龄 "+EVAL.ageReq:""}</div>`;
   ranked.slice(0,3).forEach((r,idx)=>{
     const s=r.s; const w=r.w;
     const skillMiss = skills.filter(x=>!(w.skills||[]).includes(x));
@@ -2855,6 +2922,9 @@ function renderResult(o, scroll){
     </div>`;
   });
   html += `</div>`;
+  } else {
+    html += `<div class="sec"><h3><span class="bar"></span>照护人员安排</h3><div class="hint">照护人员由机构统一匹配安排，面试通过后告知。</div></div>`;
+  }
 
   /* ---- 价格 ---- */
   html += `<div class="sec"><h3><span class="bar"></span>费用归总（预估月费）</h3>
@@ -2868,16 +2938,18 @@ function renderResult(o, scroll){
   } else {
     html += `<tr class="rule"><td>专项护理加价</td><td>+¥0</td></tr>`;
   }
-  html += `<tr><td>夜间护理加价（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>`;
+  html += `<tr><td>夜间护理价格（${esc(NIGHT||"无")}）</td><td>+${money(budget.nightSum)}</td></tr>`;
   html += `<tr><td>风险管控加价（跌倒${RISK.fall||"无"}/走失${RISK.wander||"无"}/压疮${RISK.pressure||"无"}）</td><td>+${money(budget.riskSum)}</td></tr>`;
-  html += `<tr><td>做饭要求加价（${esc(COOK_REQ||"不需要")}）</td><td>+${money(budget.cookSum)}</td></tr>`;
+  html += `<tr><td>做饭要求加价（${esc(COOK_REQ||"不需要")}）</td><td>+${money(budget.cookSum)}</td></tr>
+      <tr><td>洗浴协助（${esc(BATH_REQ||"需要")}）</td><td>+${money(budget.bathSum||0)}</td></tr>`;
   if(budget.extraDaySum) html += `<tr><td>超出基准服务天数加价（多 ${budget.extraDays} 天 × ¥${RULES.extraDayFee}）</td><td>+${money(budget.extraDaySum)}</td></tr>`;
   html += `<tr><td>小计</td><td>${money(budget.sub)}</td></tr>`;
   html += `<tr class="sum"><td>预估月总费用</td><td>${money(budget.total)}</td></tr>`;
+  if((RULES.agency||0)>0) html += `<tr><td>一次性中介/服务费（${RULES.agency}个月，一次性）</td><td>${money(budget.agency)}</td></tr>`;
   html += `</table>
     <div class="finalrow">
-      <div class="final short"><span>短期最终价格（总报价 +10%）</span><b>${money(budget.total*1.10)}</b></div>
-      <div class="final long"><span>长期最终价格（总报价 +5%）</span><b>${money(budget.total*1.05)}</b></div>
+      <div class="final short"><span>短期最终价格（总报价 ×${RULES.shortMul}）</span><b>${money(budget.total*(RULES.shortMul||1.10))}</b></div>
+      <div class="final long"><span>长期最终价格（总报价 ×${RULES.longMul}）</span><b>${money(budget.total*(RULES.longMul||1.05))}</b></div>
     </div>
     <div class="formula">计算过程：${esc(budget.formula)}
 月费 = 基础月费 × 等级系数 + 专项护理 ${money(budget.medSum)} + 夜间 ${money(budget.nightSum)} + 风险 ${money(budget.riskSum)} + 做饭加价 ${money(budget.cookSum)}
@@ -2907,11 +2979,16 @@ function copySummary(){
   const lines = [];
   lines.push("【居家照护评估 · 智能匹配与报价】");
   lines.push("评估日期：" + ((EVAL&&EVAL.start)||new Date().toISOString().slice(0,10)));
-  lines.push(`被照护人：${EVAL.name||"（未填）"}${EVAL.gender?(" · "+EVAL.gender):""}${EVAL.age?(" · "+EVAL.age+"岁"):""}`);
+  lines.push(`被照护人：${EVAL.name||"（未填）"}${EVAL.gender?(" · "+EVAL.gender):""}${EVAL.age?(" · "+EVAL.age+"岁"):""}${EVAL.weight?(" · "+EVAL.weight+"kg"):""}`);
+  lines.push(`护工要求：${EVAL.genderReq?("性别 "+EVAL.genderReq):"性别不限"}${EVAL.ageReq?(" · 年龄 "+EVAL.ageReq):""}`);
   lines.push(`护理等级：${LAST_RESULT.o.level}　服务类型：${LAST_RESULT.o.svc}`);
-  lines.push("推荐照护人员：");
-  ranked.slice(0,3).forEach((r,i)=>{ lines.push(`${i+1}. ${r.w.name}（${r.s.total.toFixed(1)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验`); });
-  lines.push(`预估月费：${money(budget.total)}　短期 ${money(budget.total*1.10)}（+10%）　长期 ${money(budget.total*1.05)}（+5%）`);
+  if(SHOW_WORKERS){
+    lines.push("推荐照护人员：");
+    ranked.slice(0,3).forEach((r,i)=>{ lines.push(`${i+1}. ${r.w.name}（${r.s.total.toFixed(1)}分）· ${r.w.gender||""} · ${r.w.age||"—"}岁 · ${r.w.years||0}年经验`); });
+  } else {
+    lines.push("照护人员由机构统一安排，面试通过后告知。");
+  }
+  lines.push(`预估月费：${money(budget.total)}　短期 ${money(budget.total*(RULES.shortMul||1.10))}　长期 ${money(budget.total*(RULES.longMul||1.05))}`);
   lines.push("照护任务清单：");
   tasks.forEach(t=>lines.push("· "+t));
   const txt = lines.join("\n");
@@ -2957,13 +3034,14 @@ function saveRecord(){
     tasks: tasks.slice(),
     skills: (o.skills||[]).slice(),
     certReq: o.certReq ? {need:o.certReq.need, label:o.certReq.label} : null,
-    ranked: ranked.slice(0,3).map(r=>({
+    ranked: SHOW_WORKERS ? ranked.slice(0,3).map(r=>({
       name: r.w.name||"", gender: r.w.gender||"", age: r.w.age||"", years: r.w.years||0,
       certs: (r.w.certs||[]).slice(), note: r.w.note||"",
       total: Math.round(r.s.total*10)/10
-    }))
+    })) : []
   };
   const list = loadRecords(); list.unshift(rec);
+  if(list.length>100) list.length=100;
   saveRecords(list);
   renderRecords();
   toast("已保存到评估记录","ok");
@@ -2987,9 +3065,9 @@ function renderRecords(){
       </div>
       <div class="rec-meta"><span class="pill">${esc(r.level)}</span><span class="pill">${esc(r.svc)}</span></div>
       <div class="rec-rows">
-        <div class="rec-row"><i>报价</i><b>${money(r.budget.total)}</b><span class="mini">短期 ${money(r.budget.total*1.10)} · 长期 ${money(r.budget.total*1.05)}</span></div>
+        <div class="rec-row"><i>报价</i><b>${money(r.budget.total)}</b><span class="mini">短期 ${money(r.budget.total*(RULES.shortMul||1.10))} · 长期 ${money(r.budget.total*(RULES.longMul||1.05))}</span></div>
         <div class="rec-row"><i>任务</i><b>${r.tasks.length} 项</b><span class="mini">照护任务清单</span></div>
-        <div class="rec-row"><i>护工</i><b>${r.ranked.length} 人</b><span class="mini">${r.ranked.map(x=>esc(x.name)).join("、")}</span></div>
+        ${SHOW_WORKERS? `<div class="rec-row"><i>护工</i><b>${r.ranked.length} 人</b><span class="mini">${r.ranked.map(x=>esc(x.name)).join("、")}</span></div>` : `<div class="rec-row"><i>护工</i><b>统一安排</b><span class="mini">面试通过后告知</span></div>`}
       </div>
       <div class="rec-btns">
         <button class="btn sm" data-rec-act="view">查看详情</button>
@@ -3008,6 +3086,13 @@ function renderRecords(){
       }
     });
   });
+  const clearBar=$("recClearBar");
+  if(clearBar) clearBar.style.display = list.length? "" : "none";
+  const cb=$("btnClearRecs");
+  if(cb && !cb.dataset.bound){ cb.dataset.bound="1"; cb.addEventListener("click",()=>{
+    if(cb.dataset.armed){ saveRecords([]); toast("已清空全部记录","ok"); renderRecords(); }
+    else { cb.dataset.armed="1"; cb.textContent="确认清空？"; setTimeout(()=>{ if(cb.dataset.armed){ delete cb.dataset.armed; cb.textContent="清空全部记录"; } },2500); }
+  }); }
 }
 function renderRecordDetail(r){
   recDetailOpen = r.id;
@@ -3025,14 +3110,14 @@ function renderRecordDetail(r){
     priceRows += `<tr><td>专项护理加价</td><td>+¥0</td></tr>`;
   }
   priceRows += `
-    <tr><td>夜间护理加价</td><td>+${money(b.nightSum)}</td></tr>
+    <tr><td>夜间护理价格</td><td>+${money(b.nightSum)}</td></tr>
     <tr><td>风险管控加价</td><td>+${money(b.riskSum)}</td></tr>
     <tr><td>做饭要求加价</td><td>+${money(b.cookSum)}</td></tr>`;
   if(b.extraDaySum) priceRows += `<tr><td>超出基准天数加价（多 ${b.extraDays} 天 × ¥${RULES.extraDayFee}）</td><td>+${money(b.extraDaySum)}</td></tr>`;
   priceRows += `
     <tr><td>小计</td><td>${money(b.sub)}</td></tr>
     <tr class="sum"><td>预估月总费用</td><td>${money(b.total)}</td></tr>`;
-  const workers = r.ranked.map((w,i)=>`
+  const workers = (SHOW_WORKERS && r.ranked.length) ? r.ranked.map((w,i)=>`
     <div class="rec-w">
       <div class="rec-wtop">
         <div class="av">${esc((w.name||"?").slice(0,1))}</div>
@@ -3044,7 +3129,7 @@ function renderRecordDetail(r){
       </div>
       <div class="rec-wmeta2">${esc((w.certs||[]).join(" / ")||"暂无证书信息")}</div>
       ${w.note?`<div class="hint" style="margin-top:4px">擅长：${esc(w.note)}</div>`:""}
-    </div>`).join("");
+    </div>`).join("") : `<div class="hint">照护人员由机构统一匹配安排，面试通过后告知。</div>`;
   box.innerHTML = `
     <div class="rec-detail">
       <div class="rec-dhead">
@@ -3055,14 +3140,14 @@ function renderRecordDetail(r){
       <div class="rec-sec"><h3>① 报价</h3>
         <table class="price">${priceRows}</table>
         <div class="finalrow">
-          <div class="final short"><span>短期最终价格（总报价 +10%）</span><b>${money(b.total*1.10)}</b></div>
-          <div class="final long"><span>长期最终价格（总报价 +5%）</span><b>${money(b.total*1.05)}</b></div>
+          <div class="final short"><span>短期最终价格（总报价 ×${RULES.shortMul}）</span><b>${money(b.total*(RULES.shortMul||1.10))}</b></div>
+          <div class="final long"><span>长期最终价格（总报价 ×${RULES.longMul}）</span><b>${money(b.total*(RULES.longMul||1.05))}</b></div>
         </div>
       </div>
       <div class="rec-sec"><h3>② 要做到的事（照护任务清单）</h3>
         <ul class="tasks">${r.tasks.map(t=>`<li><label><input type="checkbox"><span>${esc(t)}</span></label></li>`).join("")}</ul>
       </div>
-      <div class="rec-sec"><h3>③ 护工任务（匹配照护人员 Top ${Math.min(3,r.ranked.length)}）</h3>${workers}</div>
+      <div class="rec-sec"><h3>${SHOW_WORKERS? "③ 护工任务（匹配照护人员 Top "+Math.min(3,r.ranked.length)+"）" : "③ 照护人员安排"}</h3>${workers}</div>
     </div>`;
   $("recBack").addEventListener("click", renderRecords);
   box.querySelectorAll("ul.tasks input").forEach(cb=>{
@@ -3070,12 +3155,12 @@ function renderRecordDetail(r){
   });
 }
 function clearForm(){
-  ["f_name","f_gender","f_age","f_weight","f_live","f_diag","f_chronic","f_surgery","f_med",
+  ["f_name","f_gender","f_age","f_weight","f_live","f_addr","f_diag","f_chronic","f_surgery","f_med",
    "f_insulin","f_insulin_time","f_oral","f_oral_time","f_monitor","f_othercare","f_consc","f_cog","f_sense",
    "f_days","f_hours","f_start","f_ageReq","f_cookWhat","f_cannot"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
   document.querySelectorAll("#pane-assess .chip").forEach(c=>{ c.classList.remove("on"); c.setAttribute("aria-pressed","false"); });
   document.querySelectorAll("#pane-assess .needchk").forEach(l=>{ const cb=l.querySelector("input"); if(cb) cb.checked=false; l.classList.remove("on"); });
-  ADL={}; NEEDSET={}; RISK={fall:"",wander:"",pressure:""}; SELF=""; NIGHT=""; SVC=""; GENDER_REQ=""; COOK_REQ=""; EVAL={}; LAST_RESULT=null;
+  ADL={}; NEEDSET={}; RISK={fall:"",wander:"",pressure:""}; SELF=""; NIGHT=""; SVC=""; GENDER_REQ=""; COOK_REQ=""; BATH_REQ="需要"; EVAL={}; LAST_RESULT=null;
   try{ localStorage.removeItem(LSFORM); }catch(e){}
   const rb=$("resultBox");
   if(rb) rb.innerHTML = "";
@@ -3141,7 +3226,7 @@ function makeLockedCopy(){
 /* ---------- 15. 示例填充 ---------- */
 function fillDemo(){
   const set=(id,v)=>{ const el=$(id); if(el) el.value=v; };
-  set("f_name","王奶奶"); set("f_gender","女"); set("f_age","78"); set("f_weight","55"); set("f_live","独居");
+  set("f_name","王奶奶"); set("f_gender","女"); set("f_age","78"); set("f_weight","55"); set("f_live","独居"); set("f_addr","呼和浩特市赛罕区××小区 ×栋×单元");
   set("f_diag","脑梗后遗症、高血压"); set("f_chronic","冠心病 8 年"); set("f_surgery","髋关节置换术后 1 月"); set("f_med","降压药每日 1 次");
   set("f_insulin","2"); set("f_insulin_time","早、晚饭前"); set("f_oral","3"); set("f_oral_time","三餐后");
   set("f_monitor","2"); set("f_othercare","伤口换药每 2 日 1 次");
@@ -3179,6 +3264,8 @@ function initMenu(){
 /* ---------- 17. 初始化 ---------- */
 function init(){
   load();
+  try{ SHOW_WORKERS = localStorage.getItem("care-show-workers-v1")!=="0"; }catch(e){ SHOW_WORKERS=true; }
+  refreshLockBtn();
   refreshSyncMeta();
   pullRemoteConfig();
   loadOrg();
@@ -3221,6 +3308,7 @@ function init(){
   $("btnReset").addEventListener("click", ()=>{ if(guardAdmin()) resetAll(); });
   const bf = $("btnFreeze"); if(bf) bf.addEventListener("click", makeLockedCopy);
   $("btnPrint").addEventListener("click", ()=>window.print());
+  const lb=$("btnLockWorkers"); if(lb) lb.addEventListener("click", toggleWorkersLock);
   $("btnQuote").addEventListener("click", buildQuoteSheet);
   $("btnWork").addEventListener("click", buildWorkSheet);
   $("sheetClose").addEventListener("click", closeSheet);
